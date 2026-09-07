@@ -32,11 +32,28 @@
     <main class="main">
 
         <header class="topbar">
-            <input
-                class="search"
-                type="text"
-                placeholder="Search assets, IP address, hostname..."
-            >
+            <form class="topbar-search-form" action="/assets" method="get">
+                <input
+                    class="search"
+                    type="text"
+                    name="q"
+                    value="{{ search_query }}"
+                    placeholder="Search assets, IP address, hostname..."
+                >
+
+                {% if selected_asset_type %}
+                <input type="hidden" name="asset_type" value="{{ selected_asset_type }}">
+                {% endif %}
+
+                {% if selected_environment %}
+                <input type="hidden" name="environment" value="{{ selected_environment }}">
+                {% endif %}
+
+                {% if selected_status %}
+                <input type="hidden" name="status" value="{{ selected_status }}">
+                {% endif %}
+            </form>
+
             <div class="user">Syawal Ans</div>
         </header>
 
@@ -51,10 +68,91 @@
                 <a class="btn" href="/assets/new">+ Add Asset</a>
             </div>
 
+            <form class="asset-filters" action="/assets" method="get">
+
+                <div class="filter-group filter-search">
+                    <label for="filter-q">Search</label>
+                    <input
+                        id="filter-q"
+                        type="text"
+                        name="q"
+                        value="{{ search_query }}"
+                        placeholder="Hostname, IP, vendor, model..."
+                    >
+                </div>
+
+                <div class="filter-group">
+                    <label for="asset-type">Asset Type</label>
+                    <select id="asset-type" name="asset_type">
+                        <option value="">All Types</option>
+                        {% for item in asset_types %}
+                        <option
+                            value="{{ item }}"
+                            {% if selected_asset_type == item %}selected{% endif %}
+                        >
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="environment">Environment</label>
+                    <select id="environment" name="environment">
+                        <option value="">All Environments</option>
+                        {% for item in environments %}
+                        <option
+                            value="{{ item }}"
+                            {% if selected_environment == item %}selected{% endif %}
+                        >
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="">All Statuses</option>
+                        {% for item in statuses %}
+                        <option
+                            value="{{ item }}"
+                            {% if selected_status == item %}selected{% endif %}
+                        >
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button class="btn" type="submit">
+                        Apply Filter
+                    </button>
+
+                    <a class="btn-secondary" href="/assets">
+                        Reset
+                    </a>
+                </div>
+
+            </form>
+
             <div class="table-card">
 
                 <div class="table-header">
-                    All Assets
+                    <div>
+                        All Assets
+                    </div>
+
+                    <div class="result-count">
+                        {{ assets | length }}
+                        {% if assets | length == 1 %}
+                            asset
+                        {% else %}
+                            assets
+                        {% endif %}
+                    </div>
                 </div>
 
                 <table>
@@ -76,7 +174,7 @@
                         <tr>
                             <td>
                                 <a href="/assets/{{ asset.id }}" class="asset-link">
-                                <strong>{{ asset.hostname }}</strong>
+                                    <strong>{{ asset.hostname }}</strong>
                                 </a>
                             </td>
                             <td>{{ asset.asset_type }}</td>
@@ -94,7 +192,7 @@
                     {% else %}
                         <tr>
                             <td colspan="7" class="empty-state">
-                                No infrastructure assets available.
+                                No assets match the current search or filters.
                             </td>
                         </tr>
                     {% endif %}

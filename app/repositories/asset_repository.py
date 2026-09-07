@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.models.asset import AssetModel
@@ -10,9 +10,52 @@ class AssetRepository:
         self,
         db: Session,
     ) -> list[Asset]:
-        result = db.execute(
-            select(AssetModel).order_by(AssetModel.id.desc())
+        return self.search(db)
+
+    def search(
+        self,
+        db: Session,
+        query: str | None = None,
+        asset_type: str | None = None,
+        environment: str | None = None,
+        status: str | None = None,
+    ) -> list[Asset]:
+        statement = select(AssetModel)
+
+        if query:
+            search_term = f"%{query.strip()}%"
+
+            statement = statement.where(
+                or_(
+                    AssetModel.name.ilike(search_term),
+                    AssetModel.hostname.ilike(search_term),
+                    AssetModel.ip_address.ilike(search_term),
+                    AssetModel.vendor.ilike(search_term),
+                    AssetModel.model.ilike(search_term),
+                    AssetModel.location.ilike(search_term),
+                )
+            )
+
+        if asset_type:
+            statement = statement.where(
+                AssetModel.asset_type == asset_type
+            )
+
+        if environment:
+            statement = statement.where(
+                AssetModel.environment == environment
+            )
+
+        if status:
+            statement = statement.where(
+                AssetModel.status == status
+            )
+
+        statement = statement.order_by(
+            AssetModel.id.desc()
         )
+
+        result = db.execute(statement)
         rows = result.scalars().all()
 
         return [

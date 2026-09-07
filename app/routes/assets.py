@@ -29,9 +29,19 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 @router.get("", response_class=HTMLResponse)
 def assets_list(
     request: Request,
+    q: str | None = None,
+    asset_type: str | None = None,
+    environment: str | None = None,
+    status: str | None = None,
     db: Session = Depends(get_db),
 ):
-    assets = asset_service.get_all_assets(db)
+    assets = asset_service.search_assets(
+        db=db,
+        query=q,
+        asset_type=asset_type,
+        environment=environment,
+        status=status,
+    )
 
     return templates.TemplateResponse(
         request=request,
@@ -39,6 +49,13 @@ def assets_list(
         context={
             "page_title": f"Assets - {settings.APP_NAME}",
             "assets": assets,
+            "search_query": q or "",
+            "selected_asset_type": asset_type or "",
+            "selected_environment": environment or "",
+            "selected_status": status or "",
+            "asset_types": ASSET_TYPES,
+            "environments": ENVIRONMENTS,
+            "statuses": ASSET_STATUSES,
         },
     )
 

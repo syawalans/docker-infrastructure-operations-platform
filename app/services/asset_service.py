@@ -11,6 +11,22 @@ class AssetService:
     ):
         return asset_repository.get_all(db)
 
+    def search_assets(
+        self,
+        db: Session,
+        query: str | None = None,
+        asset_type: str | None = None,
+        environment: str | None = None,
+        status: str | None = None,
+    ):
+        return asset_repository.search(
+            db=db,
+            query=query,
+            asset_type=asset_type,
+            environment=environment,
+            status=status,
+        )
+
     def get_asset(
         self,
         db: Session,
