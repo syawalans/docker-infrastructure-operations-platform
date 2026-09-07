@@ -4,10 +4,10 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.routes.dashboard import router as dashboard_router
-from app.routes.assets import router as assets_router
 from app.core.database import Base, engine
 from app.models.asset import AssetModel
+from app.routes.assets import router as assets_router
+from app.routes.dashboard import router as dashboard_router
 
 
 BASE_DIR = Path(__file__).resolve().parent

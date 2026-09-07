@@ -5,7 +5,10 @@ from app.schemas.asset import AssetCreate
 
 
 class AssetService:
-    def get_all_assets(self, db: Session):
+    def get_all_assets(
+        self,
+        db: Session,
+    ):
         return asset_repository.get_all(db)
 
     def get_asset(
@@ -26,6 +29,28 @@ class AssetService:
         return asset_repository.create(
             db,
             asset_data,
+        )
+
+    def update_asset(
+        self,
+        db: Session,
+        asset_id: int,
+        asset_data: AssetCreate,
+    ):
+        return asset_repository.update(
+            db,
+            asset_id,
+            asset_data,
+        )
+
+    def delete_asset(
+        self,
+        db: Session,
+        asset_id: int,
+    ) -> bool:
+        return asset_repository.delete(
+            db,
+            asset_id,
         )
 
     def get_dashboard_data(
