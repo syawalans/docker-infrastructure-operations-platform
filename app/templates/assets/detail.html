@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Infrastructure Ops</div>
+
+        <div class="nav-title">Main</div>
+        <a href="/" class="nav-item">Dashboard</a>
+
+        <div class="nav-title">Assets</div>
+        <a href="/assets" class="nav-item active">All Assets</a>
+
+        <div class="nav-title">System</div>
+        <a href="#" class="nav-item">Monitoring</a>
+        <a href="#" class="nav-item">Reports</a>
+        <a href="#" class="nav-item">Settings</a>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div></div>
+            <div class="user">Syawal Ans</div>
+        </header>
+
+        <section class="content">
+
+            <div class="page-header">
+                <div>
+                    <h1>{{ asset.hostname }}</h1>
+                    <p>Infrastructure asset details.</p>
+                </div>
+
+                <div>
+                    <a href="/assets" class="btn-secondary">Back</a>
+                    <a href="/assets/{{ asset.id }}/edit" class="btn">
+                        Edit Asset
+                    </a>
+                </div>
+            </div>
+
+            <div class="form-card">
+
+                <div class="detail-grid">
+
+                    <div>
+                        <strong>Name</strong>
+                        <p>{{ asset.name }}</p>
+                    </div>
+
+                    <div>
+                        <strong>Hostname</strong>
+                        <p>{{ asset.hostname }}</p>
+                    </div>
+
+                    <div>
+                        <strong>Asset Type</strong>
+                        <p>{{ asset.asset_type }}</p>
+                    </div>
+
+                    <div>
+                        <strong>IP Address</strong>
+                        <p>{{ asset.ip_address }}</p>
+                    </div>
+
+                    <div>
+                        <strong>Vendor</strong>
+                        <p>{{ asset.vendor or "-" }}</p>
+                    </div>
+
+                    <div>
+                        <strong>Model</strong>
+                        <p>{{ asset.model or "-" }}</p>
+                    </div>
+
+                    <div>
+                        <strong>Operating System</strong>
+                        <p>{{ asset.operating_system or "-" }}</p>
+                    </div>
+
+                    <div>
+                        <strong>Environment</strong>
+                        <p>{{ asset.environment }}</p>
+                    </div>
+
+                    <div>
+                        <strong>Status</strong>
+                        <p>{{ asset.status }}</p>
+                    </div>
+
+                    <div>
+                        <strong>Location</strong>
+                        <p>{{ asset.location or "-" }}</p>
+                    </div>
+
+                </div>
+
+                <div>
+                    <strong>Description</strong>
+                    <p>{{ asset.description or "-" }}</p>
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+</div>
+</body>
+</html>

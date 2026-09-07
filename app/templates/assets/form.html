@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Infrastructure Ops</div>
+
+        <div class="nav-title">Main</div>
+        <a href="/" class="nav-item">Dashboard</a>
+
+        <div class="nav-title">Assets</div>
+        <a href="/assets" class="nav-item active">All Assets</a>
+
+        <div class="nav-title">System</div>
+        <a href="#" class="nav-item">Monitoring</a>
+        <a href="#" class="nav-item">Reports</a>
+        <a href="#" class="nav-item">Settings</a>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div></div>
+            <div class="user">Syawal Ans</div>
+        </header>
+
+        <section class="content">
+
+            <div class="page-header">
+                <div>
+                    <h1>Add Infrastructure Asset</h1>
+                    <p>Register a new infrastructure asset.</p>
+                </div>
+            </div>
+
+            <form method="post" action="/assets/new" class="form-card">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Hostname</label>
+                        <input name="hostname" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Asset Type</label>
+                        <select name="asset_type" required>
+                            <option value="">Select type</option>
+
+                            {% for asset_type in asset_types %}
+                            <option value="{{ asset_type }}">
+                            {{ asset_type }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>IP Address</label>
+                        <input name="ip_address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Vendor</label>
+                        <input name="vendor">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Model</label>
+                        <input name="model">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Operating System</label>
+                        <input name="operating_system">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Environment</label>
+                        <select name="environment" required>
+                            <option value="">Select environment</option>
+                            {% for environment in environments %}
+                            <option value="{{ environment }}">
+                            {{ environment }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status" required>
+                             <option value="">Select status</option>
+                              {% for status in statuses %}
+                             <option value="{{ status }}">
+                              {{ status }}
+                             </option>
+                              {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input name="location">
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" rows="4"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/assets" class="btn-secondary">Cancel</a>
+                    <button type="submit" class="btn">Save Asset</button>
+                </div>
+
+            </form>
+
+        </section>
+    </main>
+
+</div>
+</body>
+</html>

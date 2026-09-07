@@ -14,10 +14,10 @@
         <div class="brand">Infrastructure Ops</div>
 
         <div class="nav-title">Main</div>
-        <a href="/" class="nav-item active">Dashboard</a>
+        <a href="/" class="nav-item">Dashboard</a>
 
         <div class="nav-title">Assets</div>
-        <a href="/assets" class="nav-item">All Assets</a>
+        <a href="/assets" class="nav-item active">All Assets</a>
         <a href="#" class="nav-item">Servers</a>
         <a href="#" class="nav-item">Network Devices</a>
         <a href="#" class="nav-item">Virtual Machines</a>
@@ -44,39 +44,17 @@
 
             <div class="page-header">
                 <div>
-                    <h1>Dashboard</h1>
-                    <p>Overview of your infrastructure assets and system status.</p>
+                    <h1>Infrastructure Assets</h1>
+                    <p>Manage infrastructure inventory and operational assets.</p>
                 </div>
 
-                <a href="/assets/new" class="btn">+ Add Asset</a>
-            </div>
-
-            <div class="metrics">
-                <div class="card">
-                    <div class="metric-label">Total Assets</div>
-                    <div class="metric-value">{{ stats.total_assets }}</div>
-                </div>
-
-                <div class="card">
-                    <div class="metric-label">Servers</div>
-                    <div class="metric-value">{{ stats.servers }}</div>
-                </div>
-
-                <div class="card">
-                    <div class="metric-label">Network Devices</div>
-                    <div class="metric-value">{{ stats.network_devices }}</div>
-                </div>
-
-                <div class="card">
-                    <div class="metric-label">Offline Assets</div>
-                    <div class="metric-value">{{ stats.offline_assets }}</div>
-                </div>
+                <a class="btn" href="/assets/new">+ Add Asset</a>
             </div>
 
             <div class="table-card">
 
                 <div class="table-header">
-                    Latest Infrastructure Assets
+                    All Assets
                 </div>
 
                 <table>
@@ -85,7 +63,7 @@
                         <th>Hostname</th>
                         <th>Type</th>
                         <th>IP Address</th>
-                        <th>Operating System</th>
+                        <th>Vendor</th>
                         <th>Environment</th>
                         <th>Status</th>
                         <th>Location</th>
@@ -96,21 +74,20 @@
                     {% if assets %}
                         {% for asset in assets %}
                         <tr>
-                            <td><strong>{{ asset.hostname }}</strong></td>
+                            <td>
+                                <a href="/assets/{{ asset.id }}" class="asset-link">
+                                <strong>{{ asset.hostname }}</strong>
+                                </a>
+                            </td>
                             <td>{{ asset.asset_type }}</td>
                             <td>{{ asset.ip_address }}</td>
-                            <td>{{ asset.operating_system or "-" }}</td>
+                            <td>{{ asset.vendor or "-" }}</td>
                             <td>
                                 <span class="badge">
                                     {{ asset.environment }}
                                 </span>
                             </td>
-                            <td>
-                                <span class="status">
-                                    <span class="status-dot"></span>
-                                    {{ asset.status }}
-                                </span>
-                            </td>
+                            <td>{{ asset.status }}</td>
                             <td>{{ asset.location or "-" }}</td>
                         </tr>
                         {% endfor %}

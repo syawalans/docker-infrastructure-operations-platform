@@ -1,8 +1,7 @@
 from pydantic import BaseModel
 
 
-class Asset(BaseModel):
-    id: int
+class AssetBase(BaseModel):
     name: str
     hostname: str
     asset_type: str
@@ -14,3 +13,11 @@ class Asset(BaseModel):
     location: str | None = None
     status: str
     description: str | None = None
+
+
+class AssetCreate(AssetBase):
+    pass
+
+
+class Asset(AssetBase):
+    id: int
