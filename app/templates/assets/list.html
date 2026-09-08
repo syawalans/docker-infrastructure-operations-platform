@@ -1,330 +1,304 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title }}</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-
-<body>
-<div class="layout">
-
-    <aside class="sidebar">
-        <div class="brand">Infrastructure Ops</div>
-
-        <div class="nav-title">Main</div>
-        <a href="/" class="nav-item">Dashboard</a>
-
-        <div class="nav-title">Assets</div>
-
-        <a href="/assets" class="nav-item active">
-            All Assets
-        </a>
-
-        <a href="/assets/servers" class="nav-item">
-            Servers
-        </a>
-
-        <a href="/assets/network" class="nav-item">
-            Network Devices
-        </a>
-
-        <a href="/assets/virtual-machines" class="nav-item">
-            Virtual Machines
-        </a>
-
-        <a href="/assets/storage" class="nav-item">
-            Storage
-        </a>
-
-        <div class="nav-title">System</div>
-        <a href="#" class="nav-item">Monitoring</a>
-        <a href="#" class="nav-item">Reports</a>
-        <a href="#" class="nav-item">Settings</a>
-    </aside>
-
-    <main class="main">
-
-        <header class="topbar">
-
-            <form
-                class="topbar-search-form"
-                action="/assets"
-                method="get"
-            >
-                <input
-                    class="search"
-                    type="text"
-                    name="q"
-                    value="{{ search_query }}"
-                    placeholder="Search assets, IP address, hostname..."
-                >
-
-                {% if selected_asset_type %}
-                <input
-                    type="hidden"
-                    name="asset_type"
-                    value="{{ selected_asset_type }}"
-                >
-                {% endif %}
-
-                {% if selected_environment %}
-                <input
-                    type="hidden"
-                    name="environment"
-                    value="{{ selected_environment }}"
-                >
-                {% endif %}
-
-                {% if selected_status %}
-                <input
-                    type="hidden"
-                    name="status"
-                    value="{{ selected_status }}"
-                >
-                {% endif %}
-            </form>
-
-            <div class="user">
-                Syawal Ans
-            </div>
-
-        </header>
-
-        <section class="content">
-
-            <div class="page-header">
-
-                <div>
-                    <h1>Infrastructure Assets</h1>
-                    <p>
-                        Manage infrastructure inventory and operational assets.
-                    </p>
-                </div>
-
-                <a class="btn" href="/assets/new">
-                    + Add Asset
-                </a>
-
-            </div>
-
-            <form
-                class="asset-filters"
-                action="/assets"
-                method="get"
-            >
-
-                <div class="filter-group filter-search">
-                    <label for="filter-q">
-                        Search
-                    </label>
-
-                    <input
-                        id="filter-q"
-                        type="text"
-                        name="q"
-                        value="{{ search_query }}"
-                        placeholder="Hostname, IP, vendor, model..."
-                    >
-                </div>
-
-                <div class="filter-group">
-                    <label for="asset-type">
-                        Asset Type
-                    </label>
-
-                    <select
-                        id="asset-type"
-                        name="asset_type"
-                    >
-                        <option value="">
-                            All Types
-                        </option>
-
-                        {% for item in asset_types %}
-                        <option
-                            value="{{ item }}"
-                            {% if selected_asset_type == item %}selected{% endif %}
-                        >
-                            {{ item }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="environment">
-                        Environment
-                    </label>
-
-                    <select
-                        id="environment"
-                        name="environment"
-                    >
-                        <option value="">
-                            All Environments
-                        </option>
-
-                        {% for item in environments %}
-                        <option
-                            value="{{ item }}"
-                            {% if selected_environment == item %}selected{% endif %}
-                        >
-                            {{ item }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="status">
-                        Status
-                    </label>
-
-                    <select
-                        id="status"
-                        name="status"
-                    >
-                        <option value="">
-                            All Statuses
-                        </option>
-
-                        {% for item in statuses %}
-                        <option
-                            value="{{ item }}"
-                            {% if selected_status == item %}selected{% endif %}
-                        >
-                            {{ item }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="filter-actions">
-
-                    <button
-                        class="btn"
-                        type="submit"
-                    >
-                        Apply Filter
-                    </button>
-
-                    <a
-                        class="btn-secondary"
-                        href="/assets"
-                    >
-                        Reset
-                    </a>
-
-                </div>
-
-            </form>
-
-            <div class="table-card">
-
-                <div class="table-header">
-
-                    <div>
-                        All Assets
-                    </div>
-
-                    <div class="result-count">
-                        {{ assets | length }}
-
-                        {% if assets | length == 1 %}
-                            asset
-                        {% else %}
-                            assets
-                        {% endif %}
-                    </div>
-
-                </div>
-
-                <table>
-
-                    <thead>
-                    <tr>
-                        <th>Hostname</th>
-                        <th>Type</th>
-                        <th>IP Address</th>
-                        <th>Vendor</th>
-                        <th>Environment</th>
-                        <th>Status</th>
-                        <th>Location</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-
-                    {% if assets %}
-
-                        {% for asset in assets %}
-                        <tr>
-
-                            <td>
-                                <a
-                                    href="/assets/{{ asset.id }}"
-                                    class="asset-link"
-                                >
-                                    <strong>
-                                        {{ asset.hostname }}
-                                    </strong>
-                                </a>
-                            </td>
-
-                            <td>
-                                {{ asset.asset_type }}
-                            </td>
-
-                            <td>
-                                {{ asset.ip_address }}
-                            </td>
-
-                            <td>
-                                {{ asset.vendor or "-" }}
-                            </td>
-
-                            <td>
-                                <span class="badge">
-                                    {{ asset.environment }}
-                                </span>
-                            </td>
-
-                            <td>
-                                {{ asset.status }}
-                            </td>
-
-                            <td>
-                                {{ asset.location or "-" }}
-                            </td>
-
-                        </tr>
-                        {% endfor %}
-
-                    {% else %}
-
-                        <tr>
-                            <td
-                                colspan="7"
-                                class="empty-state"
-                            >
-                                No assets match the current search or filters.
-                            </td>
-                        </tr>
-
-                    {% endif %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </section>
-
-    </main>
+{% extends "base.html" %}
+
+{% set active_nav = "assets" %}
+
+
+{% block topbar %}
+
+<form
+    class="topbar-search-form"
+    action="/assets"
+    method="get"
+>
+
+    <input
+        class="search"
+        type="text"
+        name="q"
+        value="{{ search_query }}"
+        placeholder="Search assets, IP address, hostname..."
+    >
+
+    {% if selected_asset_type %}
+    <input
+        type="hidden"
+        name="asset_type"
+        value="{{ selected_asset_type }}"
+    >
+    {% endif %}
+
+    {% if selected_environment %}
+    <input
+        type="hidden"
+        name="environment"
+        value="{{ selected_environment }}"
+    >
+    {% endif %}
+
+    {% if selected_status %}
+    <input
+        type="hidden"
+        name="status"
+        value="{{ selected_status }}"
+    >
+    {% endif %}
+
+</form>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Infrastructure Assets</h1>
+
+        <p>
+            Manage infrastructure inventory and operational assets.
+        </p>
+    </div>
+
+    <a
+        class="btn"
+        href="/assets/new"
+    >
+        + Add Asset
+    </a>
 
 </div>
-</body>
-</html>
+
+
+<form
+    class="asset-filters"
+    action="/assets"
+    method="get"
+>
+
+    <div class="filter-group filter-search">
+
+        <label for="filter-q">
+            Search
+        </label>
+
+        <input
+            id="filter-q"
+            type="text"
+            name="q"
+            value="{{ search_query }}"
+            placeholder="Hostname, IP, vendor, model..."
+        >
+
+    </div>
+
+
+    <div class="filter-group">
+
+        <label for="asset-type">
+            Asset Type
+        </label>
+
+        <select
+            id="asset-type"
+            name="asset_type"
+        >
+
+            <option value="">
+                All Types
+            </option>
+
+            {% for item in asset_types %}
+            <option
+                value="{{ item }}"
+                {% if selected_asset_type == item %}selected{% endif %}
+            >
+                {{ item }}
+            </option>
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <div class="filter-group">
+
+        <label for="environment">
+            Environment
+        </label>
+
+        <select
+            id="environment"
+            name="environment"
+        >
+
+            <option value="">
+                All Environments
+            </option>
+
+            {% for item in environments %}
+            <option
+                value="{{ item }}"
+                {% if selected_environment == item %}selected{% endif %}
+            >
+                {{ item }}
+            </option>
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <div class="filter-group">
+
+        <label for="status">
+            Status
+        </label>
+
+        <select
+            id="status"
+            name="status"
+        >
+
+            <option value="">
+                All Statuses
+            </option>
+
+            {% for item in statuses %}
+            <option
+                value="{{ item }}"
+                {% if selected_status == item %}selected{% endif %}
+            >
+                {{ item }}
+            </option>
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <div class="filter-actions">
+
+        <button
+            class="btn"
+            type="submit"
+        >
+            Apply Filter
+        </button>
+
+        <a
+            class="btn-secondary"
+            href="/assets"
+        >
+            Reset
+        </a>
+
+    </div>
+
+</form>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+
+        <div>
+            All Assets
+        </div>
+
+        <div class="result-count">
+            {{ assets | length }}
+
+            {% if assets | length == 1 %}
+                asset
+            {% else %}
+                assets
+            {% endif %}
+        </div>
+
+    </div>
+
+    <table>
+
+        <thead>
+        <tr>
+            <th>Hostname</th>
+            <th>Type</th>
+            <th>IP Address</th>
+            <th>Vendor</th>
+            <th>Environment</th>
+            <th>Status</th>
+            <th>Location</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        {% if assets %}
+
+            {% for asset in assets %}
+            <tr>
+
+                <td>
+                    <a
+                        href="/assets/{{ asset.id }}"
+                        class="asset-link"
+                    >
+                        <strong>
+                            {{ asset.hostname }}
+                        </strong>
+                    </a>
+                </td>
+
+                <td>
+                    {{ asset.asset_type }}
+                </td>
+
+                <td>
+                    {{ asset.ip_address }}
+                </td>
+
+                <td>
+                    {{ asset.vendor or "-" }}
+                </td>
+
+                <td>
+                    <span class="badge">
+                        {{ asset.environment }}
+                    </span>
+                </td>
+
+                <td>
+                    {{ asset.status }}
+                </td>
+
+                <td>
+                    {{ asset.location or "-" }}
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        {% else %}
+
+            <tr>
+                <td
+                    colspan="7"
+                    class="empty-state"
+                >
+                    No assets match the current search or filters.
+                </td>
+            </tr>
+
+        {% endif %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

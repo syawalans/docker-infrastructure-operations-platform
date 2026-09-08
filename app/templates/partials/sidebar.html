@@ -1,0 +1,63 @@
+<aside class="sidebar">
+    <div class="brand">Infrastructure Ops</div>
+
+    <div class="nav-title">Main</div>
+
+    <a
+        href="/"
+        class="nav-item {% if active_nav == 'dashboard' %}active{% endif %}"
+    >
+        Dashboard
+    </a>
+
+    <div class="nav-title">Assets</div>
+
+    <a
+        href="/assets"
+        class="nav-item {% if active_nav == 'assets' %}active{% endif %}"
+    >
+        All Assets
+    </a>
+
+    <a
+        href="/assets/servers"
+        class="nav-item {% if active_nav == 'servers' %}active{% endif %}"
+    >
+        Servers
+    </a>
+
+    <a
+        href="/assets/network"
+        class="nav-item {% if active_nav == 'network' %}active{% endif %}"
+    >
+        Network Devices
+    </a>
+
+    <a
+        href="/assets/virtual-machines"
+        class="nav-item {% if active_nav == 'virtual-machines' %}active{% endif %}"
+    >
+        Virtual Machines
+    </a>
+
+    <a
+        href="/assets/storage"
+        class="nav-item {% if active_nav == 'storage' %}active{% endif %}"
+    >
+        Storage
+    </a>
+
+    <div class="nav-title">System</div>
+
+    <a href="#" class="nav-item">
+        Monitoring
+    </a>
+
+    <a href="#" class="nav-item">
+        Reports
+    </a>
+
+    <a href="#" class="nav-item">
+        Settings
+    </a>
+</aside>

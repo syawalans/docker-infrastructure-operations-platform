@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ page_title }}</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+
+<div class="layout">
+
+    {% include "partials/sidebar.html" %}
+
+    <main class="main">
+
+        <header class="topbar">
+
+            {% block topbar %}
+            <div></div>
+            {% endblock %}
+
+            <div class="user">
+                Syawal Ans
+            </div>
+
+        </header>
+
+        <section class="content">
+            {% block content %}{% endblock %}
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>
