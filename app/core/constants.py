@@ -21,3 +21,17 @@ ASSET_STATUSES = [
     "Maintenance",
     "Inactive",
 ]
+
+
+MONITORING_CHECK_TYPES = [
+    "ICMP",
+    "TCP",
+    "HTTP",
+    "HTTPS",
+]
+
+MONITORING_STATUSES = [
+    "UP",
+    "DOWN",
+    "UNKNOWN",
+]

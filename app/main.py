@@ -6,6 +6,10 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.models.asset import AssetModel
+from app.models.monitoring import (
+    MonitoringConfigModel,
+    MonitoringResultModel,
+)
 from app.routes.assets import router as assets_router
 from app.routes.dashboard import router as dashboard_router
 
