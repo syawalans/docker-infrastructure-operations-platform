@@ -60,12 +60,14 @@
         </p>
     </div>
 
+    {% if has_permission(current_user, PERMISSION_ASSET_CREATE) %}
     <a
         class="btn"
         href="/assets/new"
     >
         + Add Asset
     </a>
+    {% endif %}
 
 </div>
 

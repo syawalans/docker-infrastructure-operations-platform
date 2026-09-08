@@ -6,8 +6,19 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.constants import ASSET_STATUSES, ASSET_TYPES, ENVIRONMENTS
+from app.core.constants import (
+    ASSET_STATUSES,
+    ASSET_TYPES,
+    ENVIRONMENTS,
+    PERMISSION_ASSET_CREATE,
+    PERMISSION_ASSET_DELETE,
+    PERMISSION_ASSET_EDIT,
+    PERMISSION_ASSET_VIEW,
+)
 from app.core.database import get_db
+from app.core.permissions import require_permission
+from app.core.template_context import configure_template_permissions
+from app.models.user import UserModel
 from app.schemas.asset import AssetCreate
 from app.services.asset_service import asset_service
 
@@ -18,9 +29,12 @@ router = APIRouter(
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 templates = Jinja2Templates(
     directory=BASE_DIR / "templates"
 )
+
+configure_template_permissions(templates)
 
 
 @router.get("", response_class=HTMLResponse)
@@ -30,6 +44,9 @@ def assets_list(
     asset_type: str | None = None,
     environment: str | None = None,
     status: str | None = None,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_VIEW)
+    ),
     db: Session = Depends(get_db),
 ):
     assets = asset_service.search_assets(
@@ -53,6 +70,7 @@ def assets_list(
             "asset_types": ASSET_TYPES,
             "environments": ENVIRONMENTS,
             "statuses": ASSET_STATUSES,
+            "current_user": current_user,
         },
     )
 
@@ -60,6 +78,9 @@ def assets_list(
 @router.get("/new", response_class=HTMLResponse)
 def asset_create_form(
     request: Request,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_CREATE)
+    ),
 ):
     return templates.TemplateResponse(
         request=request,
@@ -74,6 +95,7 @@ def asset_create_form(
             "asset_types": ASSET_TYPES,
             "environments": ENVIRONMENTS,
             "statuses": ASSET_STATUSES,
+            "current_user": current_user,
         },
     )
 
@@ -86,6 +108,7 @@ def render_asset_category(
     description: str,
     asset_types_filter: list[str],
     active_nav: str,
+    current_user: UserModel,
 ):
     assets = []
 
@@ -106,6 +129,7 @@ def render_asset_category(
             "description": description,
             "assets": assets,
             "active_nav": active_nav,
+            "current_user": current_user,
         },
     )
 
@@ -113,6 +137,9 @@ def render_asset_category(
 @router.get("/servers", response_class=HTMLResponse)
 def assets_servers(
     request: Request,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_VIEW)
+    ),
     db: Session = Depends(get_db),
 ):
     return render_asset_category(
@@ -122,12 +149,16 @@ def assets_servers(
         description="Physical server infrastructure assets.",
         asset_types_filter=["Server"],
         active_nav="servers",
+        current_user=current_user,
     )
 
 
 @router.get("/network", response_class=HTMLResponse)
 def assets_network(
     request: Request,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_VIEW)
+    ),
     db: Session = Depends(get_db),
 ):
     return render_asset_category(
@@ -142,12 +173,16 @@ def assets_network(
             "Access Point",
         ],
         active_nav="network",
+        current_user=current_user,
     )
 
 
 @router.get("/virtual-machines", response_class=HTMLResponse)
 def assets_virtual_machines(
     request: Request,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_VIEW)
+    ),
     db: Session = Depends(get_db),
 ):
     return render_asset_category(
@@ -157,12 +192,16 @@ def assets_virtual_machines(
         description="Virtualized infrastructure assets.",
         asset_types_filter=["Virtual Machine"],
         active_nav="virtual-machines",
+        current_user=current_user,
     )
 
 
 @router.get("/storage", response_class=HTMLResponse)
 def assets_storage(
     request: Request,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_VIEW)
+    ),
     db: Session = Depends(get_db),
 ):
     return render_asset_category(
@@ -172,6 +211,7 @@ def assets_storage(
         description="Storage infrastructure assets.",
         asset_types_filter=["Storage"],
         active_nav="storage",
+        current_user=current_user,
     )
 
 
@@ -179,6 +219,9 @@ def assets_storage(
 def asset_detail(
     request: Request,
     asset_id: int,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_VIEW)
+    ),
     db: Session = Depends(get_db),
 ):
     asset = asset_service.get_asset(
@@ -198,6 +241,7 @@ def asset_detail(
         context={
             "page_title": f"{asset.hostname} - {settings.APP_NAME}",
             "asset": asset,
+            "current_user": current_user,
         },
     )
 
@@ -206,6 +250,9 @@ def asset_detail(
 def asset_edit_form(
     request: Request,
     asset_id: int,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_EDIT)
+    ),
     db: Session = Depends(get_db),
 ):
     asset = asset_service.get_asset(
@@ -232,6 +279,7 @@ def asset_edit_form(
             "asset_types": ASSET_TYPES,
             "environments": ENVIRONMENTS,
             "statuses": ASSET_STATUSES,
+            "current_user": current_user,
         },
     )
 
@@ -249,6 +297,9 @@ def asset_create(
     location: str = Form(""),
     status: str = Form(...),
     description: str = Form(""),
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_CREATE)
+    ),
     db: Session = Depends(get_db),
 ):
     asset_data = AssetCreate(
@@ -290,6 +341,9 @@ def asset_edit(
     location: str = Form(""),
     status: str = Form(...),
     description: str = Form(""),
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_EDIT)
+    ),
     db: Session = Depends(get_db),
 ):
     asset_data = AssetCreate(
@@ -327,6 +381,9 @@ def asset_edit(
 @router.post("/{asset_id}/delete")
 def asset_delete(
     asset_id: int,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_ASSET_DELETE)
+    ),
     db: Session = Depends(get_db),
 ):
     deleted = asset_service.delete_asset(

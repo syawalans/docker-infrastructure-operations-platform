@@ -15,8 +15,16 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.constants import MONITORING_CHECK_TYPES
+from app.core.constants import (
+    MONITORING_CHECK_TYPES,
+    PERMISSION_MONITORING_CONFIGURE,
+    PERMISSION_MONITORING_RUN_CHECK,
+    PERMISSION_MONITORING_VIEW,
+)
 from app.core.database import get_db
+from app.core.permissions import require_permission
+from app.core.template_context import configure_template_permissions
+from app.models.user import UserModel
 from app.schemas.monitoring import MonitoringConfigCreate
 from app.services.asset_service import asset_service
 from app.services.monitoring_service import monitoring_service
@@ -33,6 +41,8 @@ templates = Jinja2Templates(
     directory=BASE_DIR / "templates"
 )
 
+configure_template_permissions(templates)
+
 
 @router.get(
     "",
@@ -40,6 +50,9 @@ templates = Jinja2Templates(
 )
 def monitoring_overview(
     request: Request,
+    current_user: UserModel = Depends(
+        require_permission(PERMISSION_MONITORING_VIEW)
+    ),
     db: Session = Depends(get_db),
 ):
     data = monitoring_service.get_overview(db)
@@ -51,6 +64,7 @@ def monitoring_overview(
             "page_title": f"Monitoring - {settings.APP_NAME}",
             "stats": data["stats"],
             "monitoring_items": data["items"],
+            "current_user": current_user,
         },
     )
 
@@ -62,6 +76,11 @@ def monitoring_overview(
 def monitoring_config_form(
     request: Request,
     asset_id: int,
+    current_user: UserModel = Depends(
+        require_permission(
+            PERMISSION_MONITORING_CONFIGURE
+        )
+    ),
     db: Session = Depends(get_db),
 ):
     asset = asset_service.get_asset(
@@ -93,6 +112,7 @@ def monitoring_config_form(
             "config": config,
             "check_types": MONITORING_CHECK_TYPES,
             "error": None,
+            "current_user": current_user,
         },
     )
 
@@ -110,6 +130,11 @@ def monitoring_config_save(
     interval_seconds: int = Form(60),
     timeout_seconds: int = Form(5),
     enabled: bool = Form(False),
+    current_user: UserModel = Depends(
+        require_permission(
+            PERMISSION_MONITORING_CONFIGURE
+        )
+    ),
     db: Session = Depends(get_db),
 ):
     asset = asset_service.get_asset(
@@ -161,6 +186,7 @@ def monitoring_config_save(
                 "config": config,
                 "check_types": MONITORING_CHECK_TYPES,
                 "error": str(exc),
+                "current_user": current_user,
             },
             status_code=400,
         )
@@ -176,6 +202,11 @@ def monitoring_config_save(
 )
 def monitoring_config_delete(
     asset_id: int,
+    current_user: UserModel = Depends(
+        require_permission(
+            PERMISSION_MONITORING_CONFIGURE
+        )
+    ),
     db: Session = Depends(get_db),
 ):
     asset = asset_service.get_asset(
@@ -205,6 +236,11 @@ def monitoring_config_delete(
 )
 def monitoring_run_check(
     asset_id: int,
+    current_user: UserModel = Depends(
+        require_permission(
+            PERMISSION_MONITORING_RUN_CHECK
+        )
+    ),
     db: Session = Depends(get_db),
 ):
     asset = asset_service.get_asset(

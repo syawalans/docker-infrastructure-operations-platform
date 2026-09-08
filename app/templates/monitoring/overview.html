@@ -127,7 +127,10 @@
                 <td>
                     <div class="monitoring-actions">
 
-                        {% if item.configured %}
+                        {% if item.configured and has_permission(
+                            current_user,
+                            PERMISSION_MONITORING_RUN_CHECK
+                        ) %}
 
                         <form
                             action="/monitoring/assets/{{ item.asset_id }}/run-check"
@@ -143,6 +146,10 @@
 
                         {% endif %}
 
+                        {% if has_permission(
+                            current_user,
+                            PERMISSION_MONITORING_CONFIGURE
+                        ) %}
                         <a
                             href="/monitoring/assets/{{ item.asset_id }}/configure"
                             class="btn-small"
@@ -153,6 +160,7 @@
                                 Setup
                             {% endif %}
                         </a>
+                        {% endif %}
 
                     </div>
                 </td>

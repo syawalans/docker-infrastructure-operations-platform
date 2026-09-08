@@ -1,0 +1,33 @@
+from fastapi.templating import Jinja2Templates
+
+from app.core.constants import (
+    PERMISSION_ASSET_CREATE,
+    PERMISSION_ASSET_DELETE,
+    PERMISSION_ASSET_EDIT,
+    PERMISSION_MONITORING_CONFIGURE,
+    PERMISSION_MONITORING_RUN_CHECK,
+    PERMISSION_SETTINGS_VIEW,
+)
+from app.core.permissions import has_permission
+
+
+def configure_template_permissions(
+    templates: Jinja2Templates,
+) -> None:
+    templates.env.globals.update(
+        {
+            "has_permission": has_permission,
+            "PERMISSION_ASSET_CREATE": PERMISSION_ASSET_CREATE,
+            "PERMISSION_ASSET_EDIT": PERMISSION_ASSET_EDIT,
+            "PERMISSION_ASSET_DELETE": PERMISSION_ASSET_DELETE,
+            "PERMISSION_MONITORING_CONFIGURE": (
+                PERMISSION_MONITORING_CONFIGURE
+            ),
+            "PERMISSION_MONITORING_RUN_CHECK": (
+                PERMISSION_MONITORING_RUN_CHECK
+            ),
+            "PERMISSION_SETTINGS_VIEW": (
+                PERMISSION_SETTINGS_VIEW
+            ),
+        }
+    )

@@ -21,20 +21,25 @@
             Back
         </a>
 
+        {% if has_permission(current_user, PERMISSION_MONITORING_CONFIGURE) %}
         <a
             href="/monitoring/assets/{{ asset.id }}/configure"
             class="btn-secondary"
         >
             Monitoring
         </a>
+        {% endif %}
 
+        {% if has_permission(current_user, PERMISSION_ASSET_EDIT) %}
         <a
             href="/assets/{{ asset.id }}/edit"
             class="btn"
         >
             Edit Asset
         </a>
+        {% endif %}
 
+        {% if has_permission(current_user, PERMISSION_ASSET_DELETE) %}
         <form
             action="/assets/{{ asset.id }}/delete"
             method="post"
@@ -47,6 +52,7 @@
                 Delete Asset
             </button>
         </form>
+        {% endif %}
 
     </div>
 
