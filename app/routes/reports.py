@@ -56,6 +56,32 @@ def reports_overview(
     )
 
 
+@router.get("/monitoring")
+def monitoring_report(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(
+        require_permission(
+            PERMISSION_REPORT_VIEW
+        )
+    ),
+):
+    data = report_service.get_monitoring_report(
+        db
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="reports/monitoring.html",
+        context={
+            "page_title": "Monitoring Report",
+            "active_nav": "reports",
+            "current_user": current_user,
+            **data,
+        },
+    )
+
+
 @router.get("/assets")
 def asset_inventory_report(
     request: Request,

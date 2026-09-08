@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+
+{% set active_nav = "reports" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>
+            Monitoring Report
+        </h1>
+
+        <p>
+            Current infrastructure availability and
+            monitoring health.
+        </p>
+    </div>
+
+    <a
+        href="/reports"
+        class="btn-secondary"
+    >
+        ← Back to Reports
+    </a>
+
+</div>
+
+
+<div class="metrics">
+
+    <div class="card">
+        <div class="metric-label">
+            Total Monitored
+        </div>
+
+        <div class="metric-value">
+            {{ stats.total_monitored }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Up
+        </div>
+
+        <div class="metric-value">
+            {{ stats.up }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Down
+        </div>
+
+        <div class="metric-value">
+            {{ stats.down }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Unknown
+        </div>
+
+        <div class="metric-value">
+            {{ stats.unknown }}
+        </div>
+    </div>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+
+        <div>
+            Monitoring Status
+        </div>
+
+        <div class="result-count">
+
+            {{ items | length }}
+
+            {% if items | length == 1 %}
+                monitored asset
+            {% else %}
+                monitored assets
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="report-table-scroll">
+
+        <table class="report-monitoring-table">
+
+            <thead>
+            <tr>
+                <th>Asset</th>
+                <th>Type</th>
+                <th>Environment</th>
+                <th>Check</th>
+                <th>Target</th>
+                <th>Status</th>
+                <th>Response Time</th>
+                <th>Last Checked</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            {% if items %}
+
+                {% for item in items %}
+
+                <tr>
+
+                    <td>
+                        <a
+                            href="/assets/{{ item.asset_id }}"
+                            class="asset-link"
+                        >
+                            <strong>
+                                {{ item.hostname }}
+                            </strong>
+                        </a>
+                    </td>
+
+                    <td>
+                        {{ item.asset_type }}
+                    </td>
+
+                    <td>
+                        <span class="badge">
+                            {{ item.environment }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ item.check_type }}
+                    </td>
+
+                    <td>
+                        <span class="report-target">
+
+                            {{ item.target }}{% if item.port %}:{{ item.port }}{% endif %}{% if item.http_path %}{{ item.http_path }}{% endif %}
+
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="status">
+
+                            <span
+                                class="status-dot
+                                {% if item.status == 'DOWN' %}
+                                    report-status-down
+                                {% elif item.status == 'UNKNOWN' %}
+                                    report-status-unknown
+                                {% endif %}"
+                            ></span>
+
+                            {{ item.status }}
+
+                        </span>
+                    </td>
+
+                    <td>
+                        {% if item.response_time_ms is not none %}
+                            {{ "%.2f"|format(
+                                item.response_time_ms
+                            ) }} ms
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if item.checked_at %}
+                            {{ item.checked_at.strftime(
+                                "%Y-%m-%d %H:%M:%S UTC"
+                            ) }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+                    <td
+                        colspan="8"
+                        class="empty-state"
+                    >
+                        No active monitoring configurations
+                        are available.
+                    </td>
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<div class="report-section monitoring-performance-section">
+
+    <div class="report-section-heading">
+        <h2>Monitoring Performance</h2>
+
+        <p>
+            Historical monitoring performance across
+            all recorded health checks.
+        </p>
+    </div>
+
+
+    <div class="report-performance-grid">
+
+        <div class="card">
+            <div class="metric-label">
+                Total Checks
+            </div>
+
+            <div class="metric-value">
+                {{ performance.total_checks }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">
+                Successful
+            </div>
+
+            <div class="metric-value">
+                {{ performance.successful_checks }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">
+                Failed
+            </div>
+
+            <div class="metric-value">
+                {{ performance.failed_checks }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">
+                Availability
+            </div>
+
+            <div class="metric-value">
+                {{ "%.2f"|format(
+                    performance.availability_percent
+                ) }}%
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">
+                Avg Response
+            </div>
+
+            <div class="metric-value">
+                {% if performance.average_response_time_ms is not none %}
+                    {{ "%.2f"|format(
+                        performance.average_response_time_ms
+                    ) }} ms
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="table-card report-history-card">
+
+    <div class="table-header">
+
+        <div>
+            Recent Monitoring History
+        </div>
+
+        <div class="result-count">
+            Latest {{ history_items | length }} checks
+        </div>
+
+    </div>
+
+
+    <div class="report-table-scroll monitoring-history-scroll">
+
+        <table class="report-history-table">
+
+            <thead>
+            <tr>
+                <th>Asset</th>
+                <th>Check</th>
+                <th>Target</th>
+                <th>Status</th>
+                <th>Response Time</th>
+                <th>Checked At</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            {% if history_items %}
+
+                {% for item in history_items %}
+
+                <tr>
+
+                    <td>
+                        <a
+                            href="/assets/{{ item.asset_id }}"
+                            class="asset-link"
+                        >
+                            <strong>
+                                {{ item.hostname }}
+                            </strong>
+                        </a>
+                    </td>
+
+                    <td>
+                        {{ item.check_type }}
+                    </td>
+
+                    <td>
+                        <span class="report-target">
+                            {{ item.target }}{% if item.port %}:{{ item.port }}{% endif %}{% if item.http_path %}{{ item.http_path }}{% endif %}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="status">
+
+                            <span
+                                class="status-dot
+                                {% if item.status == 'DOWN' %}
+                                    report-status-down
+                                {% elif item.status == 'UNKNOWN' %}
+                                    report-status-unknown
+                                {% endif %}"
+                            ></span>
+
+                            {{ item.status }}
+
+                        </span>
+                    </td>
+
+                    <td>
+                        {% if item.response_time_ms is not none %}
+                            {{ "%.2f"|format(
+                                item.response_time_ms
+                            ) }} ms
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ item.checked_at.strftime(
+                            "%Y-%m-%d %H:%M:%S UTC"
+                        ) }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+                    <td
+                        colspan="6"
+                        class="empty-state"
+                    >
+                        No monitoring history available.
+                    </td>
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -952,3 +952,96 @@ a.report-card:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* Monitoring Report */
+
+.report-monitoring-table {
+    min-width: 1050px;
+}
+
+.report-monitoring-table td {
+    vertical-align: middle;
+}
+
+.report-target {
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+    font-size: 13px;
+}
+
+.status-dot.report-status-down {
+    background: #ef4444;
+}
+
+.status-dot.report-status-unknown {
+    background: #94a3b8;
+}
+
+/* Monitoring Report Performance */
+
+.monitoring-performance-section {
+    margin-top: 30px;
+}
+
+.monitoring-performance-section
+.report-section-heading {
+    margin-bottom: 16px;
+}
+
+.report-performance-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.report-performance-grid .card {
+    min-height: 100px;
+}
+
+.report-history-card {
+    margin-top: 30px;
+}
+
+.monitoring-history-scroll {
+    max-height: 440px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.report-history-table {
+    min-width: 900px;
+}
+
+.report-history-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8fafc;
+}
+
+.report-history-table td {
+    vertical-align: middle;
+}
+
+@media (max-width: 1250px) {
+    .report-performance-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .report-performance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .monitoring-history-scroll {
+        max-height: 380px;
+    }
+}
