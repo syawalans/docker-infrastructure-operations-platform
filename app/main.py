@@ -12,6 +12,7 @@ from app.models.monitoring import (
 )
 from app.routes.assets import router as assets_router
 from app.routes.dashboard import router as dashboard_router
+from app.routes.monitoring import router as monitoring_router
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -31,6 +32,7 @@ app.mount(
 
 app.include_router(dashboard_router)
 app.include_router(assets_router)
+app.include_router(monitoring_router)
 
 
 @app.get("/health", tags=["Health"])

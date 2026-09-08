@@ -427,3 +427,45 @@ th {
         flex-wrap: wrap;
     }
 }
+
+
+/* Monitoring */
+
+.monitoring-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.monitoring-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #94a3b8;
+}
+
+.monitoring-status-up {
+    color: #15803d;
+}
+
+.monitoring-status-up .monitoring-dot {
+    background: #22c55e;
+}
+
+.monitoring-status-down {
+    color: #b42318;
+}
+
+.monitoring-status-down .monitoring-dot {
+    background: #ef4444;
+}
+
+.monitoring-status-unknown {
+    color: #64748b;
+}
+
+.monitoring-status-unknown .monitoring-dot {
+    background: #94a3b8;
+}

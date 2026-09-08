@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% set active_nav = "monitoring" %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Monitoring</h1>
+        <p>
+            Infrastructure health and monitoring status overview.
+        </p>
+    </div>
+
+</div>
+
+
+<div class="metrics">
+
+    <div class="card">
+        <div class="metric-label">
+            Total Monitored
+        </div>
+
+        <div class="metric-value">
+            {{ stats.total_monitored }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Up
+        </div>
+
+        <div class="metric-value">
+            {{ stats.up }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Down
+        </div>
+
+        <div class="metric-value">
+            {{ stats.down }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Unknown
+        </div>
+
+        <div class="metric-value">
+            {{ stats.unknown }}
+        </div>
+    </div>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+
+        <div>
+            Infrastructure Health
+        </div>
+
+        <div class="result-count">
+            {{ monitoring_items | length }} assets
+        </div>
+
+    </div>
+
+    <table>
+
+        <thead>
+        <tr>
+            <th>Hostname</th>
+            <th>Type</th>
+            <th>IP Address</th>
+            <th>Environment</th>
+            <th>Check</th>
+            <th>Status</th>
+            <th>Response</th>
+            <th>Last Check</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        {% if monitoring_items %}
+
+            {% for item in monitoring_items %}
+            <tr>
+
+                <td>
+                    <a
+                        href="/assets/{{ item.asset_id }}"
+                        class="asset-link"
+                    >
+                        <strong>
+                            {{ item.hostname }}
+                        </strong>
+                    </a>
+                </td>
+
+                <td>
+                    {{ item.asset_type }}
+                </td>
+
+                <td>
+                    {{ item.ip_address }}
+                </td>
+
+                <td>
+                    <span class="badge">
+                        {{ item.environment }}
+                    </span>
+                </td>
+
+                <td>
+                    {{ item.check_type }}
+                </td>
+
+                <td>
+                    <span class="monitoring-status monitoring-status-{{ item.status | lower }}">
+                        <span class="monitoring-dot"></span>
+                        {{ item.status }}
+                    </span>
+                </td>
+
+                <td>
+                    {% if item.response_time_ms is not none %}
+                        {{ "%.2f"|format(item.response_time_ms) }} ms
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if item.checked_at %}
+                        {{ item.checked_at.strftime("%Y-%m-%d %H:%M:%S") }}
+                    {% else %}
+                        Never
+                    {% endif %}
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        {% else %}
+
+            <tr>
+                <td
+                    colspan="8"
+                    class="empty-state"
+                >
+                    No infrastructure assets available for monitoring.
+                </td>
+            </tr>
+
+        {% endif %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
