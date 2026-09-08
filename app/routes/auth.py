@@ -22,6 +22,7 @@ from app.core.database import get_db
 from app.core.login_throttle import login_throttle
 from app.core.template_context import configure_template_permissions
 from app.models.user import UserModel
+from app.services.audit_service import audit_service
 from app.services.auth_service import auth_service
 
 
@@ -139,6 +140,18 @@ def login(
     )
 
     if retry_after > 0:
+        audit_service.log(
+            db,
+            action="LOGIN_THROTTLED",
+            resource_type="AUTHENTICATION",
+            status="BLOCKED",
+            request=request,
+            details={
+                "attempted_login": login.strip(),
+                "retry_after_seconds": retry_after,
+            },
+        )
+
         return render_login(
             request,
             error=(
@@ -166,7 +179,30 @@ def login(
             )
         )
 
+        audit_service.log(
+            db,
+            action="LOGIN_FAILED",
+            resource_type="AUTHENTICATION",
+            status="FAILURE",
+            request=request,
+            details={
+                "attempted_login": login.strip(),
+            },
+        )
+
         if retry_after > 0:
+            audit_service.log(
+                db,
+                action="LOGIN_THROTTLED",
+                resource_type="AUTHENTICATION",
+                status="BLOCKED",
+                request=request,
+                details={
+                    "attempted_login": login.strip(),
+                    "retry_after_seconds": retry_after,
+                },
+            )
+
             return render_login(
                 request,
                 error=(
@@ -185,6 +221,16 @@ def login(
             request,
             error="Invalid username, email, or password.",
         )
+
+    audit_service.log(
+        db,
+        action="LOGIN_SUCCESS",
+        resource_type="AUTHENTICATION",
+        resource_id=result.user.id,
+        status="SUCCESS",
+        actor=result.user,
+        request=request,
+    )
 
     login_throttle.reset(
         client_key
@@ -268,6 +314,16 @@ def change_password(
             error=str(exc),
         )
 
+    audit_service.log(
+        db,
+        action="PASSWORD_CHANGED",
+        resource_type="USER",
+        resource_id=current_user.id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+    )
+
     response = RedirectResponse(
         url="/",
         status_code=303,
@@ -284,6 +340,9 @@ def change_password(
 @router.post("/logout")
 def logout(
     request: Request,
+    current_user: UserModel | None = Depends(
+        get_current_user
+    ),
     db: Session = Depends(get_db),
 ):
     session_token = request.cookies.get(
@@ -294,6 +353,17 @@ def logout(
         db,
         session_token,
     )
+
+    if current_user is not None:
+        audit_service.log(
+            db,
+            action="LOGOUT",
+            resource_type="AUTHENTICATION",
+            resource_id=current_user.id,
+            status="SUCCESS",
+            actor=current_user,
+            request=request,
+        )
 
     response = RedirectResponse(
         url="/login",

@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.csrf_middleware import CSRFMiddleware
 from app.core.database import Base, SessionLocal, engine
 from app.models.asset import AssetModel
+from app.models.audit import AuditLogModel
 from app.models.monitoring import (
     MonitoringConfigModel,
     MonitoringResultModel,

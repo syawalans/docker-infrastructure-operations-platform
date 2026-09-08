@@ -21,6 +21,7 @@ from app.core.template_context import configure_template_permissions
 from app.models.user import UserModel
 from app.schemas.asset import AssetCreate
 from app.services.asset_service import asset_service
+from app.services.audit_service import audit_service
 
 
 router = APIRouter(
@@ -286,6 +287,7 @@ def asset_edit_form(
 
 @router.post("/new")
 def asset_create(
+    request: Request,
     name: str = Form(...),
     hostname: str = Form(...),
     asset_type: str = Form(...),
@@ -316,9 +318,24 @@ def asset_create(
         description=description or None,
     )
 
-    asset_service.create_asset(
+    asset = asset_service.create_asset(
         db,
         asset_data,
+    )
+
+    audit_service.log(
+        db,
+        action="ASSET_CREATED",
+        resource_type="ASSET",
+        resource_id=asset.id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+        details={
+            "hostname": asset.hostname,
+            "asset_type": asset.asset_type,
+            "environment": asset.environment,
+        },
     )
 
     return RedirectResponse(
@@ -329,6 +346,7 @@ def asset_create(
 
 @router.post("/{asset_id}/edit")
 def asset_edit(
+    request: Request,
     asset_id: int,
     name: str = Form(...),
     hostname: str = Form(...),
@@ -372,6 +390,22 @@ def asset_edit(
             detail="Asset not found",
         )
 
+    audit_service.log(
+        db,
+        action="ASSET_UPDATED",
+        resource_type="ASSET",
+        resource_id=asset.id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+        details={
+            "hostname": asset.hostname,
+            "asset_type": asset.asset_type,
+            "environment": asset.environment,
+            "status": asset.status,
+        },
+    )
+
     return RedirectResponse(
         url=f"/assets/{asset.id}",
         status_code=303,
@@ -380,12 +414,24 @@ def asset_edit(
 
 @router.post("/{asset_id}/delete")
 def asset_delete(
+    request: Request,
     asset_id: int,
     current_user: UserModel = Depends(
         require_permission(PERMISSION_ASSET_DELETE)
     ),
     db: Session = Depends(get_db),
 ):
+    asset = asset_service.get_asset(
+        db,
+        asset_id,
+    )
+
+    if asset is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Asset not found",
+        )
+
     deleted = asset_service.delete_asset(
         db,
         asset_id,
@@ -396,6 +442,21 @@ def asset_delete(
             status_code=404,
             detail="Asset not found",
         )
+
+    audit_service.log(
+        db,
+        action="ASSET_DELETED",
+        resource_type="ASSET",
+        resource_id=asset.id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+        details={
+            "hostname": asset.hostname,
+            "asset_type": asset.asset_type,
+            "environment": asset.environment,
+        },
+    )
 
     return RedirectResponse(
         url="/assets",

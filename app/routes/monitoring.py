@@ -27,6 +27,7 @@ from app.core.template_context import configure_template_permissions
 from app.models.user import UserModel
 from app.schemas.monitoring import MonitoringConfigCreate
 from app.services.asset_service import asset_service
+from app.services.audit_service import audit_service
 from app.services.monitoring_service import monitoring_service
 
 
@@ -162,7 +163,7 @@ def monitoring_config_save(
             enabled=enabled,
         )
 
-        monitoring_service.save_config(
+        config = monitoring_service.save_config(
             db,
             data,
         )
@@ -191,6 +192,27 @@ def monitoring_config_save(
             status_code=400,
         )
 
+    audit_service.log(
+        db,
+        action="MONITORING_CONFIG_UPDATED",
+        resource_type="MONITORING_CONFIG",
+        resource_id=config.id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+        details={
+            "asset_id": asset.id,
+            "hostname": asset.hostname,
+            "check_type": config.check_type,
+            "target": config.target,
+            "port": config.port,
+            "http_path": config.http_path,
+            "interval_seconds": config.interval_seconds,
+            "timeout_seconds": config.timeout_seconds,
+            "enabled": config.enabled,
+        },
+    )
+
     return RedirectResponse(
         url="/monitoring",
         status_code=303,
@@ -201,6 +223,7 @@ def monitoring_config_save(
     "/assets/{asset_id}/delete"
 )
 def monitoring_config_delete(
+    request: Request,
     asset_id: int,
     current_user: UserModel = Depends(
         require_permission(
@@ -220,9 +243,49 @@ def monitoring_config_delete(
             detail="Asset not found",
         )
 
-    monitoring_service.delete_config(
+    config = monitoring_service.get_config_by_asset(
         db,
         asset_id,
+    )
+
+    if config is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Monitoring configuration not found",
+        )
+
+    config_id = config.id
+
+    config_details = {
+        "asset_id": asset.id,
+        "hostname": asset.hostname,
+        "check_type": config.check_type,
+        "target": config.target,
+        "port": config.port,
+        "http_path": config.http_path,
+        "enabled": config.enabled,
+    }
+
+    deleted = monitoring_service.delete_config(
+        db,
+        asset_id,
+    )
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Monitoring configuration not found",
+        )
+
+    audit_service.log(
+        db,
+        action="MONITORING_CONFIG_DELETED",
+        resource_type="MONITORING_CONFIG",
+        resource_id=config_id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+        details=config_details,
     )
 
     return RedirectResponse(
@@ -235,6 +298,7 @@ def monitoring_config_delete(
     "/assets/{asset_id}/run-check"
 )
 def monitoring_run_check(
+    request: Request,
     asset_id: int,
     current_user: UserModel = Depends(
         require_permission(
@@ -255,7 +319,7 @@ def monitoring_run_check(
         )
 
     try:
-        monitoring_service.run_check(
+        result = monitoring_service.run_check(
             db,
             asset_id,
         )
@@ -265,6 +329,26 @@ def monitoring_run_check(
             status_code=400,
             detail=str(exc),
         ) from exc
+
+    audit_service.log(
+        db,
+        action="MONITORING_CHECK_RUN",
+        resource_type="MONITORING_RESULT",
+        resource_id=result.id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+        details={
+            "asset_id": asset.id,
+            "hostname": asset.hostname,
+            "check_type": result.check_type,
+            "target": result.target,
+            "port": result.port,
+            "http_path": result.http_path,
+            "result_status": result.status,
+            "response_time_ms": result.response_time_ms,
+        },
+    )
 
     return RedirectResponse(
         url="/monitoring",

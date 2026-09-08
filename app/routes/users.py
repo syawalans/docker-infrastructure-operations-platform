@@ -25,6 +25,7 @@ from app.core.template_context import (
     configure_template_permissions,
 )
 from app.models.user import UserModel
+from app.services.audit_service import audit_service
 from app.services.user_management_service import (
     user_management_service,
 )
@@ -186,6 +187,21 @@ def user_create(
             status_code=400,
         )
 
+    audit_service.log(
+        db,
+        action="USER_CREATED",
+        resource_type="USER",
+        resource_id=result.user.id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+        details={
+            "username": result.user.username,
+            "role": result.user.role,
+            "is_active": result.user.is_active,
+        },
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="users/created.html",
@@ -272,14 +288,16 @@ def user_edit(
     }
 
     try:
-        user_management_service.update_user(
-            db,
-            actor=current_user,
-            user_id=user_id,
-            full_name=full_name,
-            email=email,
-            role=role,
-            is_active=is_active,
+        updated_user = (
+            user_management_service.update_user(
+                db,
+                actor=current_user,
+                user_id=user_id,
+                full_name=full_name,
+                email=email,
+                role=role,
+                is_active=is_active,
+            )
         )
 
     except ValueError as exc:
@@ -291,6 +309,21 @@ def user_edit(
             form_data=form_data,
             status_code=400,
         )
+
+    audit_service.log(
+        db,
+        action="USER_UPDATED",
+        resource_type="USER",
+        resource_id=updated_user.id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+        details={
+            "username": updated_user.username,
+            "role": updated_user.role,
+            "is_active": updated_user.is_active,
+        },
+    )
 
     return RedirectResponse(
         url="/users",
@@ -326,6 +359,19 @@ def user_reset_password(
             status_code=400,
             detail=str(exc),
         )
+
+    audit_service.log(
+        db,
+        action="USER_PASSWORD_RESET",
+        resource_type="USER",
+        resource_id=result.user.id,
+        status="SUCCESS",
+        actor=current_user,
+        request=request,
+        details={
+            "username": result.user.username,
+        },
+    )
 
     return templates.TemplateResponse(
         request=request,
