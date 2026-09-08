@@ -25,5 +25,58 @@ services:
       timeout: 5s
       retries: 5
 
+  web:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+
+    image: infrastructure-ops-app:dev
+    container_name: infrastructure-ops-web
+    restart: unless-stopped
+
+    command:
+      [
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8088"
+      ]
+
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+
+    ports:
+      - "${APP_PORT:-8088}:8088"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  monitoring-worker:
+    image: infrastructure-ops-app:dev
+    container_name: infrastructure-ops-monitoring-worker
+    restart: unless-stopped
+
+    command:
+      [
+        "python",
+        "-m",
+        "app.workers.monitoring_worker"
+      ]
+
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      MONITORING_SCHEDULER_POLL_SECONDS: ${MONITORING_SCHEDULER_POLL_SECONDS:-5}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      web:
+        condition: service_started
+
 volumes:
   postgres_data:
