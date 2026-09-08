@@ -19,6 +19,7 @@ from app.core.auth import (
 )
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.login_throttle import login_throttle
 from app.core.template_context import configure_template_permissions
 from app.models.user import UserModel
 from app.services.auth_service import auth_service
@@ -60,6 +61,8 @@ def render_login(
     request: Request,
     *,
     error: str | None = None,
+    status_code: int = 200,
+    headers: dict[str, str] | None = None,
 ):
     return templates.TemplateResponse(
         request=request,
@@ -69,6 +72,8 @@ def render_login(
             "app_name": settings.APP_NAME,
             "error": error,
         },
+        status_code=status_code,
+        headers=headers,
     )
 
 
@@ -121,6 +126,33 @@ def login(
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    client_key = (
+        request.client.host
+        if request.client is not None
+        else "unknown"
+    )
+
+    retry_after = (
+        login_throttle.get_retry_after(
+            client_key
+        )
+    )
+
+    if retry_after > 0:
+        return render_login(
+            request,
+            error=(
+                "Too many failed login attempts. "
+                "Please try again later."
+            ),
+            status_code=429,
+            headers={
+                "Retry-After": str(
+                    retry_after
+                )
+            },
+        )
+
     result = auth_service.authenticate(
         db,
         login=login,
@@ -128,10 +160,35 @@ def login(
     )
 
     if result is None:
+        retry_after = (
+            login_throttle.record_failure(
+                client_key
+            )
+        )
+
+        if retry_after > 0:
+            return render_login(
+                request,
+                error=(
+                    "Too many failed login attempts. "
+                    "Please try again later."
+                ),
+                status_code=429,
+                headers={
+                    "Retry-After": str(
+                        retry_after
+                    )
+                },
+            )
+
         return render_login(
             request,
             error="Invalid username, email, or password.",
         )
+
+    login_throttle.reset(
+        client_key
+    )
 
     destination = (
         "/change-password"
