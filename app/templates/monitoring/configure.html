@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% set active_nav = "monitoring" %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Configure Monitoring</h1>
+        <p>
+            Configure infrastructure health monitoring for
+            {{ asset.hostname }}.
+        </p>
+    </div>
+
+    <a
+        href="/monitoring"
+        class="btn-secondary"
+    >
+        Back
+    </a>
+
+</div>
+
+
+{% if error %}
+
+<div class="monitoring-error">
+    {{ error }}
+</div>
+
+{% endif %}
+
+
+<div class="form-card">
+
+    <div class="monitoring-asset-summary">
+
+        <div>
+            <strong>Hostname</strong>
+            <p>{{ asset.hostname }}</p>
+        </div>
+
+        <div>
+            <strong>IP Address</strong>
+            <p>{{ asset.ip_address }}</p>
+        </div>
+
+        <div>
+            <strong>Asset Type</strong>
+            <p>{{ asset.asset_type }}</p>
+        </div>
+
+        <div>
+            <strong>Environment</strong>
+            <p>{{ asset.environment }}</p>
+        </div>
+
+    </div>
+
+
+    <form
+        action="/monitoring/assets/{{ asset.id }}/configure"
+        method="post"
+        class="asset-form"
+    >
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="check_type">
+                    Check Type
+                </label>
+
+                <select
+                    id="check_type"
+                    name="check_type"
+                    required
+                >
+                    {% for check_type in check_types %}
+
+                    <option
+                        value="{{ check_type }}"
+                        {% if config and config.check_type == check_type %}
+                        selected
+                        {% endif %}
+                    >
+                        {{ check_type }}
+                    </option>
+
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="form-group">
+                <label for="target">
+                    Target
+                </label>
+
+                <input
+                    id="target"
+                    type="text"
+                    name="target"
+                    value="{{ config.target if config else asset.ip_address }}"
+                    required
+                >
+            </div>
+
+
+            <div class="form-group">
+                <label for="port">
+                    Port
+                </label>
+
+                <input
+                    id="port"
+                    type="number"
+                    name="port"
+                    min="1"
+                    max="65535"
+                    value="{{ config.port if config and config.port else '' }}"
+                    placeholder="TCP / HTTP / HTTPS"
+                >
+            </div>
+
+
+            <div class="form-group">
+                <label for="http_path">
+                    HTTP Path
+                </label>
+
+                <input
+                    id="http_path"
+                    type="text"
+                    name="http_path"
+                    value="{{ config.http_path if config and config.http_path else '' }}"
+                    placeholder="/health"
+                >
+            </div>
+
+
+            <div class="form-group">
+                <label for="interval_seconds">
+                    Interval (seconds)
+                </label>
+
+                <input
+                    id="interval_seconds"
+                    type="number"
+                    name="interval_seconds"
+                    min="10"
+                    value="{{ config.interval_seconds if config else 60 }}"
+                    required
+                >
+            </div>
+
+
+            <div class="form-group">
+                <label for="timeout_seconds">
+                    Timeout (seconds)
+                </label>
+
+                <input
+                    id="timeout_seconds"
+                    type="number"
+                    name="timeout_seconds"
+                    min="1"
+                    max="60"
+                    value="{{ config.timeout_seconds if config else 5 }}"
+                    required
+                >
+            </div>
+
+        </div>
+
+
+        <div class="monitoring-enabled">
+
+            <label>
+                <input
+                    type="checkbox"
+                    name="enabled"
+                    value="true"
+                    {% if not config or config.enabled %}
+                    checked
+                    {% endif %}
+                >
+
+                Enable monitoring
+            </label>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="/monitoring"
+                class="btn-secondary"
+            >
+                Cancel
+            </a>
+
+            <button
+                type="submit"
+                class="btn"
+            >
+                Save Monitoring Configuration
+            </button>
+
+        </div>
+
+    </form>
+
+
+    {% if config %}
+
+    <div class="monitoring-danger-zone">
+
+        <strong>Remove Monitoring Configuration</strong>
+
+        <p>
+            This removes the monitoring configuration for this asset.
+        </p>
+
+        <form
+            action="/monitoring/assets/{{ asset.id }}/delete"
+            method="post"
+            onsubmit="return confirm('Remove monitoring configuration for this asset?');"
+        >
+
+            <button
+                type="submit"
+                class="btn btn-danger"
+            >
+                Remove Configuration
+            </button>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

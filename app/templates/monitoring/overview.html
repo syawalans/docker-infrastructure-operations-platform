@@ -20,43 +20,23 @@
 <div class="metrics">
 
     <div class="card">
-        <div class="metric-label">
-            Total Monitored
-        </div>
-
-        <div class="metric-value">
-            {{ stats.total_monitored }}
-        </div>
+        <div class="metric-label">Total Monitored</div>
+        <div class="metric-value">{{ stats.total_monitored }}</div>
     </div>
 
     <div class="card">
-        <div class="metric-label">
-            Up
-        </div>
-
-        <div class="metric-value">
-            {{ stats.up }}
-        </div>
+        <div class="metric-label">Up</div>
+        <div class="metric-value">{{ stats.up }}</div>
     </div>
 
     <div class="card">
-        <div class="metric-label">
-            Down
-        </div>
-
-        <div class="metric-value">
-            {{ stats.down }}
-        </div>
+        <div class="metric-label">Down</div>
+        <div class="metric-value">{{ stats.down }}</div>
     </div>
 
     <div class="card">
-        <div class="metric-label">
-            Unknown
-        </div>
-
-        <div class="metric-value">
-            {{ stats.unknown }}
-        </div>
+        <div class="metric-label">Unknown</div>
+        <div class="metric-value">{{ stats.unknown }}</div>
     </div>
 
 </div>
@@ -88,6 +68,7 @@
             <th>Status</th>
             <th>Response</th>
             <th>Last Check</th>
+            <th>Action</th>
         </tr>
         </thead>
 
@@ -96,6 +77,7 @@
         {% if monitoring_items %}
 
             {% for item in monitoring_items %}
+
             <tr>
 
                 <td>
@@ -103,19 +85,13 @@
                         href="/assets/{{ item.asset_id }}"
                         class="asset-link"
                     >
-                        <strong>
-                            {{ item.hostname }}
-                        </strong>
+                        <strong>{{ item.hostname }}</strong>
                     </a>
                 </td>
 
-                <td>
-                    {{ item.asset_type }}
-                </td>
+                <td>{{ item.asset_type }}</td>
 
-                <td>
-                    {{ item.ip_address }}
-                </td>
+                <td>{{ item.ip_address }}</td>
 
                 <td>
                     <span class="badge">
@@ -123,9 +99,7 @@
                     </span>
                 </td>
 
-                <td>
-                    {{ item.check_type }}
-                </td>
+                <td>{{ item.check_type }}</td>
 
                 <td>
                     <span class="monitoring-status monitoring-status-{{ item.status | lower }}">
@@ -150,14 +124,48 @@
                     {% endif %}
                 </td>
 
+                <td>
+                    <div class="monitoring-actions">
+
+                        {% if item.configured %}
+
+                        <form
+                            action="/monitoring/assets/{{ item.asset_id }}/run-check"
+                            method="post"
+                        >
+                            <button
+                                type="submit"
+                                class="btn-small btn-small-primary"
+                            >
+                                Run Check
+                            </button>
+                        </form>
+
+                        {% endif %}
+
+                        <a
+                            href="/monitoring/assets/{{ item.asset_id }}/configure"
+                            class="btn-small"
+                        >
+                            {% if item.configured %}
+                                Configure
+                            {% else %}
+                                Setup
+                            {% endif %}
+                        </a>
+
+                    </div>
+                </td>
+
             </tr>
+
             {% endfor %}
 
         {% else %}
 
             <tr>
                 <td
-                    colspan="8"
+                    colspan="9"
                     class="empty-state"
                 >
                     No infrastructure assets available for monitoring.

@@ -119,6 +119,27 @@ class MonitoringResultModel(Base):
         index=True,
     )
 
+    check_type: Mapped[str | None] = mapped_column(
+        String(20),
+        nullable=True,
+        index=True,
+    )
+
+    target: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    port: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    http_path: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
     status: Mapped[str] = mapped_column(
         String(20),
         nullable=False,

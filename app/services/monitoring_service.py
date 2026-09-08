@@ -1,9 +1,132 @@
 from sqlalchemy.orm import Session
 
+from app.core.constants import MONITORING_CHECK_TYPES
 from app.repositories.monitoring_repository import monitoring_repository
+from app.schemas.monitoring import MonitoringConfigCreate
+from app.services.monitoring_checker import monitoring_checker
 
 
 class MonitoringService:
+    def get_config_by_asset(
+        self,
+        db: Session,
+        asset_id: int,
+    ):
+        return monitoring_repository.get_config_by_asset(
+            db,
+            asset_id,
+        )
+
+    def save_config(
+        self,
+        db: Session,
+        data: MonitoringConfigCreate,
+    ):
+        check_type = data.check_type.upper()
+
+        if check_type not in MONITORING_CHECK_TYPES:
+            raise ValueError(
+                "Unsupported monitoring check type."
+            )
+
+        if check_type == "TCP" and data.port is None:
+            raise ValueError(
+                "TCP monitoring requires a port."
+            )
+
+        if check_type == "HTTP" and data.port is None:
+            data.port = 80
+
+        if check_type == "HTTPS" and data.port is None:
+            data.port = 443
+
+        if check_type == "ICMP":
+            data.port = None
+            data.http_path = None
+
+        if check_type == "TCP":
+            data.http_path = None
+
+        data.check_type = check_type
+
+        existing = monitoring_repository.get_config_by_asset(
+            db,
+            data.asset_id,
+        )
+
+        if existing is None:
+            return monitoring_repository.create_config(
+                db,
+                data,
+            )
+
+        return monitoring_repository.update_config(
+            db,
+            existing,
+            data,
+        )
+
+    def delete_config(
+        self,
+        db: Session,
+        asset_id: int,
+    ) -> bool:
+        config = monitoring_repository.get_config_by_asset(
+            db,
+            asset_id,
+        )
+
+        if config is None:
+            return False
+
+        monitoring_repository.delete_config(
+            db,
+            config,
+        )
+
+        return True
+
+    def run_check(
+        self,
+        db: Session,
+        asset_id: int,
+    ):
+        config = monitoring_repository.get_config_by_asset(
+            db,
+            asset_id,
+        )
+
+        if config is None:
+            raise ValueError(
+                "Monitoring is not configured for this asset."
+            )
+
+        if not config.enabled:
+            raise ValueError(
+                "Monitoring is disabled for this asset."
+            )
+
+        check_result = monitoring_checker.run(
+            check_type=config.check_type,
+            target=config.target,
+            port=config.port,
+            http_path=config.http_path,
+            timeout_seconds=config.timeout_seconds,
+        )
+
+        return monitoring_repository.create_result(
+            db,
+            asset_id=asset_id,
+            config_id=config.id,
+            check_type=config.check_type,
+            target=config.target,
+            port=config.port,
+            http_path=config.http_path,
+            status=check_result.status,
+            response_time_ms=check_result.response_time_ms,
+            error_message=check_result.error_message,
+        )
+
     def get_overview(
         self,
         db: Session,

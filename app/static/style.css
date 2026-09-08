@@ -469,3 +469,100 @@ th {
 .monitoring-status-unknown .monitoring-dot {
     background: #94a3b8;
 }
+
+
+/* Monitoring Configuration */
+
+.monitoring-asset-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.monitoring-asset-summary p {
+    margin: 6px 0 0;
+}
+
+.monitoring-enabled {
+    margin-top: 20px;
+}
+
+.monitoring-enabled label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.monitoring-error {
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    border: 1px solid #fecaca;
+    border-radius: 7px;
+    background: #fef2f2;
+    color: #b42318;
+}
+
+.monitoring-danger-zone {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.monitoring-danger-zone p {
+    color: #64748b;
+}
+
+.btn-small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #e8f0fe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-small:hover {
+    background: #dbeafe;
+}
+
+@media (max-width: 900px) {
+    .monitoring-asset-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* Monitoring Actions */
+
+.monitoring-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.monitoring-actions form {
+    margin: 0;
+}
+
+.btn-small {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+}
+
+.btn-small-primary {
+    background: #1f6feb;
+    color: #ffffff;
+}
+
+.btn-small-primary:hover {
+    background: #1d5fd0;
+}
