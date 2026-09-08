@@ -31,5 +31,21 @@ class Settings:
         )
     )
 
+    AUTH_COOKIE_SECURE = (
+        os.getenv(
+            "AUTH_COOKIE_SECURE",
+            "false",
+        ).lower()
+        == "true"
+    )
+
+    CSRF_COOKIE_SECURE = (
+        os.getenv(
+            "CSRF_COOKIE_SECURE",
+            "false",
+        ).lower()
+        == "true"
+    )
+
 
 settings = Settings()

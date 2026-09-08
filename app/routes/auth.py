@@ -19,6 +19,7 @@ from app.core.auth import (
 )
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.template_context import configure_template_permissions
 from app.models.user import UserModel
 from app.services.auth_service import auth_service
 
@@ -32,6 +33,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(
     directory=BASE_DIR / "templates"
 )
+
+configure_template_permissions(templates)
 
 
 def set_session_cookie(
@@ -48,7 +51,7 @@ def set_session_cookie(
         ),
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=settings.AUTH_COOKIE_SECURE,
         path="/",
     )
 
@@ -245,6 +248,7 @@ def logout(
         path="/",
         httponly=True,
         samesite="lax",
+        secure=settings.AUTH_COOKIE_SECURE,
     )
 
     return response

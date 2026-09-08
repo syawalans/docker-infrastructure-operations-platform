@@ -67,6 +67,8 @@
         class="asset-form"
     >
 
+    {% include "partials/csrf_field.html" %}
+
         <div class="form-grid">
 
             <div class="form-group">
@@ -231,6 +233,8 @@
             method="post"
             onsubmit="return confirm('Remove monitoring configuration for this asset?');"
         >
+
+    {% include "partials/csrf_field.html" %}
 
             <button
                 type="submit"

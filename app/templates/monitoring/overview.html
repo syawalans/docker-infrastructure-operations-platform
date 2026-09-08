@@ -136,6 +136,8 @@
                             action="/monitoring/assets/{{ item.asset_id }}/run-check"
                             method="post"
                         >
+
+    {% include "partials/csrf_field.html" %}
                             <button
                                 type="submit"
                                 class="btn-small btn-small-primary"

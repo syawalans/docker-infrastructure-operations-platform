@@ -21,6 +21,8 @@
     class="form-card"
 >
 
+    {% include "partials/csrf_field.html" %}
+
     {% if error %}
     <div class="auth-error">
         {{ error }}
@@ -180,6 +182,8 @@
     class="form-card"
     style="margin-top: 20px;"
 >
+
+    {% include "partials/csrf_field.html" %}
 
     <div class="page-header">
 

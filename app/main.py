@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.auth import SESSION_COOKIE_NAME
 from app.core.config import settings
+from app.core.csrf_middleware import CSRFMiddleware
 from app.core.database import Base, SessionLocal, engine
 from app.models.asset import AssetModel
 from app.models.monitoring import (
@@ -31,6 +32,10 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
+)
+
+app.add_middleware(
+    CSRFMiddleware
 )
 
 app.mount(

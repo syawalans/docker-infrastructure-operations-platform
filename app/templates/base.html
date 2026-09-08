@@ -44,6 +44,8 @@
                     action="/logout"
                     class="logout-form"
                 >
+
+    {% include "partials/csrf_field.html" %}
                     <button
                         type="submit"
                         class="logout-button"
