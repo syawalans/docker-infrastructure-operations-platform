@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from sqlalchemy.orm import Session
 
 from app.core.constants import MONITORING_CHECK_TYPES
@@ -106,6 +108,16 @@ class MonitoringService:
                 "Monitoring is disabled for this asset."
             )
 
+        return self.run_config_check(
+            db,
+            config,
+        )
+
+    def run_config_check(
+        self,
+        db: Session,
+        config,
+    ):
         check_result = monitoring_checker.run(
             check_type=config.check_type,
             target=config.target,
@@ -116,7 +128,7 @@ class MonitoringService:
 
         return monitoring_repository.create_result(
             db,
-            asset_id=asset_id,
+            asset_id=config.asset_id,
             config_id=config.id,
             check_type=config.check_type,
             target=config.target,
@@ -126,6 +138,80 @@ class MonitoringService:
             response_time_ms=check_result.response_time_ms,
             error_message=check_result.error_message,
         )
+
+    def is_check_due(
+        self,
+        db: Session,
+        config,
+        now: datetime | None = None,
+    ) -> bool:
+        latest_result = (
+            monitoring_repository.get_latest_result_by_config(
+                db,
+                config.id,
+            )
+        )
+
+        if latest_result is None:
+            return True
+
+        current_time = now or datetime.now(
+            timezone.utc
+        )
+
+        next_check_at = (
+            latest_result.checked_at
+            + timedelta(
+                seconds=config.interval_seconds
+            )
+        )
+
+        return current_time >= next_check_at
+
+    def run_due_checks(
+        self,
+        db: Session,
+    ) -> dict:
+        configs = (
+            monitoring_repository.get_enabled_configs(
+                db
+            )
+        )
+
+        checked = 0
+        skipped = 0
+        failed = 0
+
+        now = datetime.now(
+            timezone.utc
+        )
+
+        for config in configs:
+            if not self.is_check_due(
+                db,
+                config,
+                now,
+            ):
+                skipped += 1
+                continue
+
+            try:
+                self.run_config_check(
+                    db,
+                    config,
+                )
+
+                checked += 1
+
+            except Exception:
+                db.rollback()
+                failed += 1
+
+        return {
+            "checked": checked,
+            "skipped": skipped,
+            "failed": failed,
+        }
 
     def get_overview(
         self,

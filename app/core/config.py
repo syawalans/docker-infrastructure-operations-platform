@@ -17,5 +17,25 @@ class Settings:
         "development"
     )
 
+    MONITORING_SCHEDULER_ENABLED = (
+        os.getenv(
+            "MONITORING_SCHEDULER_ENABLED",
+            "true",
+        ).lower()
+        in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+    )
+
+    MONITORING_SCHEDULER_POLL_SECONDS = int(
+        os.getenv(
+            "MONITORING_SCHEDULER_POLL_SECONDS",
+            "5",
+        )
+    )
+
 
 settings = Settings()

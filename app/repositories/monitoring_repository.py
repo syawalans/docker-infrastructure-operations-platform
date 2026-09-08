@@ -28,6 +28,45 @@ class MonitoringRepository:
             statement
         ).scalar_one_or_none()
 
+    def get_enabled_configs(
+        self,
+        db: Session,
+    ) -> list[MonitoringConfigModel]:
+        statement = (
+            select(MonitoringConfigModel)
+            .where(
+                MonitoringConfigModel.enabled.is_(True)
+            )
+            .order_by(MonitoringConfigModel.id.asc())
+        )
+
+        return list(
+            db.execute(
+                statement
+            ).scalars().all()
+        )
+
+    def get_latest_result_by_config(
+        self,
+        db: Session,
+        config_id: int,
+    ) -> MonitoringResultModel | None:
+        statement = (
+            select(MonitoringResultModel)
+            .where(
+                MonitoringResultModel.config_id == config_id
+            )
+            .order_by(
+                MonitoringResultModel.checked_at.desc(),
+                MonitoringResultModel.id.desc(),
+            )
+            .limit(1)
+        )
+
+        return db.execute(
+            statement
+        ).scalar_one_or_none()
+
     def create_config(
         self,
         db: Session,
@@ -134,21 +173,12 @@ class MonitoringRepository:
             latest_result = None
 
             if config is not None:
-                result_statement = (
-                    select(MonitoringResultModel)
-                    .where(
-                        MonitoringResultModel.config_id == config.id
+                latest_result = (
+                    self.get_latest_result_by_config(
+                        db,
+                        config.id,
                     )
-                    .order_by(
-                        MonitoringResultModel.checked_at.desc(),
-                        MonitoringResultModel.id.desc(),
-                    )
-                    .limit(1)
                 )
-
-                latest_result = db.execute(
-                    result_statement
-                ).scalar_one_or_none()
 
             overview.append(
                 {
