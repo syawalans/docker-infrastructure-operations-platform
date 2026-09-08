@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>{{ page_title }}</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body class="auth-page">
+
+<div class="auth-shell">
+
+    <div class="auth-card">
+
+        <div class="auth-brand">
+            <div class="auth-brand-mark">
+                IO
+            </div>
+
+            <div>
+                <h1>Infrastructure Ops</h1>
+                <p>Operations Portal</p>
+            </div>
+        </div>
+
+        <div class="auth-heading">
+            <h2>Sign in</h2>
+
+            <p>
+                Sign in to access the infrastructure
+                operations portal.
+            </p>
+        </div>
+
+        {% if error %}
+        <div class="auth-error">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form
+            method="post"
+            action="/login"
+            class="auth-form"
+        >
+
+            <div class="form-group">
+                <label for="login">
+                    Username or Email
+                </label>
+
+                <input
+                    id="login"
+                    name="login"
+                    type="text"
+                    autocomplete="username"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button
+                type="submit"
+                class="auth-submit"
+            >
+                Sign In
+            </button>
+
+        </form>
+
+        <div class="auth-footer">
+            Authorized access only
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

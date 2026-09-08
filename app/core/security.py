@@ -7,6 +7,8 @@ from pwdlib import PasswordHash
 
 password_hasher = PasswordHash.recommended()
 
+PASSWORD_SPECIAL_CHARACTERS = "!@#$%*-_"
+
 
 def hash_password(password: str) -> str:
     return password_hasher.hash(password)
@@ -22,6 +24,36 @@ def verify_password(
     )
 
 
+def validate_password(password: str) -> None:
+    if len(password) < 12:
+        raise ValueError(
+            "Password must contain at least 12 characters."
+        )
+
+    if not any(char.islower() for char in password):
+        raise ValueError(
+            "Password must contain at least one lowercase letter."
+        )
+
+    if not any(char.isupper() for char in password):
+        raise ValueError(
+            "Password must contain at least one uppercase letter."
+        )
+
+    if not any(char.isdigit() for char in password):
+        raise ValueError(
+            "Password must contain at least one number."
+        )
+
+    if not any(
+        char in PASSWORD_SPECIAL_CHARACTERS
+        for char in password
+    ):
+        raise ValueError(
+            "Password must contain at least one special character."
+        )
+
+
 def generate_temporary_password(length: int = 20) -> str:
     if length < 12:
         raise ValueError(
@@ -31,7 +63,7 @@ def generate_temporary_password(length: int = 20) -> str:
     alphabet = (
         string.ascii_letters
         + string.digits
-        + "!@#$%*-_"
+        + PASSWORD_SPECIAL_CHARACTERS
     )
 
     while True:
@@ -40,13 +72,11 @@ def generate_temporary_password(length: int = 20) -> str:
             for _ in range(length)
         )
 
-        if (
-            any(char.islower() for char in password)
-            and any(char.isupper() for char in password)
-            and any(char.isdigit() for char in password)
-            and any(char in "!@#$%*-_" for char in password)
-        ):
+        try:
+            validate_password(password)
             return password
+        except ValueError:
+            continue
 
 
 def generate_session_token() -> str:

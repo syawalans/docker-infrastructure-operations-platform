@@ -33,8 +33,25 @@
             <div></div>
             {% endblock %}
 
-            <div class="user">
-                Syawal Ans
+            <div class="topbar-user">
+
+                <div class="topbar-user-name">
+                    {{ request.state.current_user.full_name }}
+                </div>
+
+                <form
+                    method="post"
+                    action="/logout"
+                    class="logout-form"
+                >
+                    <button
+                        type="submit"
+                        class="logout-button"
+                    >
+                        Logout
+                    </button>
+                </form>
+
             </div>
 
         </header>
