@@ -60,6 +60,18 @@
         Reports
     </a>
 
+    {% if has_permission(
+        request.state.current_user,
+        PERMISSION_USER_MANAGE
+    ) %}
+    <a
+        href="/users"
+        class="nav-item {% if active_nav == 'users' %}active{% endif %}"
+    >
+        User Management
+    </a>
+    {% endif %}
+
     <a href="#" class="nav-item">
         Settings
     </a>

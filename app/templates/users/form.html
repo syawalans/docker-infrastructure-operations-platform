@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% set active_nav = "users" %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>{{ form_title }}</h1>
+        <p>{{ form_description }}</p>
+    </div>
+
+</div>
+
+
+<form
+    method="post"
+    action="{{ form_action }}"
+    class="form-card"
+>
+
+    {% if error %}
+    <div class="auth-error">
+        {{ error }}
+    </div>
+    {% endif %}
+
+
+    <div class="form-grid">
+
+        <div class="form-group">
+
+            <label>
+                Username
+            </label>
+
+            <input
+                name="username"
+                value="{% if user %}{{ user.username }}{% else %}{{ form_data.get('username', '') }}{% endif %}"
+                {% if user %}disabled{% else %}required{% endif %}
+            >
+
+            {% if user %}
+            <div class="form-help">
+                Username cannot be changed.
+            </div>
+            {% endif %}
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Full Name
+            </label>
+
+            <input
+                name="full_name"
+                value="{{ form_data.get('full_name', user.full_name if user else '') }}"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Email
+            </label>
+
+            <input
+                type="email"
+                name="email"
+                value="{{ form_data.get('email', user.email if user else '') }}"
+                required
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Role
+            </label>
+
+            {% set selected_role = form_data.get('role', user.role if user else '') %}
+
+            <select
+                name="role"
+                required
+            >
+
+                <option value="">
+                    Select role
+                </option>
+
+                {% for role in roles %}
+                <option
+                    value="{{ role }}"
+                    {% if selected_role == role %}selected{% endif %}
+                >
+                    {{ role }}
+                </option>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        {% if user %}
+
+        <div class="form-group">
+
+            <label>
+                Account Status
+            </label>
+
+            {% set selected_active = form_data.get('is_active', user.is_active) %}
+
+            <label class="checkbox-field">
+                <input
+                    type="checkbox"
+                    name="is_active"
+                    value="true"
+                    {% if selected_active %}checked{% endif %}
+                >
+
+                Active account
+            </label>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    {% if not user %}
+
+    <div class="user-form-note">
+        A temporary password will be generated automatically.
+        The user must change it after the first successful login.
+    </div>
+
+    {% endif %}
+
+
+    <div class="form-actions">
+
+        <a
+            href="/users"
+            class="btn-secondary"
+        >
+            Cancel
+        </a>
+
+        <button
+            type="submit"
+            class="btn"
+        >
+            {{ submit_label }}
+        </button>
+
+    </div>
+
+</form>
+
+
+{% if user and user.id != current_user.id %}
+
+<form
+    method="post"
+    action="/users/{{ user.id }}/reset-password"
+    class="form-card"
+    style="margin-top: 20px;"
+>
+
+    <div class="page-header">
+
+        <div>
+            <h2>Reset Password</h2>
+            <p>
+                Generate a new temporary password
+                and revoke all active sessions.
+            </p>
+        </div>
+
+        <button
+            type="submit"
+            class="btn-secondary"
+        >
+            Reset Password
+        </button>
+
+    </div>
+
+</form>
+
+{% endif %}
+
+{% endblock %}

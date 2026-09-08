@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% set active_nav = "users" %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>User Management</h1>
+        <p>
+            Manage application users, roles, and account access.
+        </p>
+    </div>
+
+    <a
+        href="/users/new"
+        class="btn"
+    >
+        + Add User
+    </a>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+
+        <div>
+            Application Users
+        </div>
+
+        <div class="result-count">
+            {{ users | length }}
+
+            {% if users | length == 1 %}
+                user
+            {% else %}
+                users
+            {% endif %}
+        </div>
+
+    </div>
+
+    <table>
+
+        <thead>
+        <tr>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Password</th>
+            <th>Last Login</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        {% for user in users %}
+
+        <tr>
+
+            <td>
+                <strong>
+                    {{ user.username }}
+                </strong>
+            </td>
+
+            <td>
+                {{ user.full_name }}
+            </td>
+
+            <td>
+                {{ user.email }}
+            </td>
+
+            <td>
+                <span class="badge">
+                    {{ user.role }}
+                </span>
+            </td>
+
+            <td>
+                {% if user.is_active %}
+                    Active
+                {% else %}
+                    Inactive
+                {% endif %}
+            </td>
+
+            <td>
+                {% if user.must_change_password %}
+                    Change Required
+                {% else %}
+                    Ready
+                {% endif %}
+            </td>
+
+            <td>
+                {% if user.last_login_at %}
+                    {{ user.last_login_at.strftime("%Y-%m-%d %H:%M:%S") }}
+                {% else %}
+                    Never
+                {% endif %}
+            </td>
+
+            <td>
+                <a
+                    href="/users/{{ user.id }}/edit"
+                    class="btn-small"
+                >
+                    Edit
+                </a>
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

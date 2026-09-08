@@ -7,6 +7,7 @@ from app.core.constants import (
     PERMISSION_MONITORING_CONFIGURE,
     PERMISSION_MONITORING_RUN_CHECK,
     PERMISSION_SETTINGS_VIEW,
+    PERMISSION_USER_MANAGE,
 )
 from app.core.permissions import has_permission
 
@@ -28,6 +29,9 @@ def configure_template_permissions(
             ),
             "PERMISSION_SETTINGS_VIEW": (
                 PERMISSION_SETTINGS_VIEW
+            ),
+            "PERMISSION_USER_MANAGE": (
+                PERMISSION_USER_MANAGE
             ),
         }
     )

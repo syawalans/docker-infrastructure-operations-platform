@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% set active_nav = "users" %}
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>User Created</h1>
+        <p>
+            The user account has been created successfully.
+        </p>
+    </div>
+
+</div>
+
+
+<div class="form-card">
+
+    <div class="user-created-summary">
+
+        <div>
+            <strong>Username</strong>
+            <p>{{ user.username }}</p>
+        </div>
+
+        <div>
+            <strong>Full Name</strong>
+            <p>{{ user.full_name }}</p>
+        </div>
+
+        <div>
+            <strong>Role</strong>
+            <p>{{ user.role }}</p>
+        </div>
+
+    </div>
+
+
+    <div class="temporary-password-box">
+
+        <div class="temporary-password-title">
+            Temporary Password
+        </div>
+
+        <div class="temporary-password-value">
+            {{ temporary_password }}
+        </div>
+
+        <p>
+            Copy this password now and provide it securely to the user.
+            It will not be displayed again.
+        </p>
+
+        <p>
+            The user will be required to create a new password
+            after the first successful login.
+        </p>
+
+    </div>
+
+
+    <div class="form-actions">
+
+        <a
+            href="/users"
+            class="btn"
+        >
+            Continue to User Management
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

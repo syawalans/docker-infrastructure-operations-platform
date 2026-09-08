@@ -9,6 +9,9 @@ from app.core.config import settings
 from app.core.constants import PERMISSION_DASHBOARD_VIEW
 from app.core.database import get_db
 from app.core.permissions import require_permission
+from app.core.template_context import (
+    configure_template_permissions,
+)
 from app.models.user import UserModel
 from app.services.asset_service import asset_service
 
@@ -20,6 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(
     directory=BASE_DIR / "templates"
 )
+
+configure_template_permissions(templates)
 
 
 @router.get("/", response_class=HTMLResponse)
