@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% set active_nav = "reports" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Reports</h1>
+
+        <p>
+            Operational reporting and infrastructure insights.
+        </p>
+    </div>
+
+</div>
+
+
+<div class="metrics">
+
+    <div class="card">
+        <div class="metric-label">
+            Total Assets
+        </div>
+
+        <div class="metric-value">
+            {{ asset_summary.total_assets }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Active
+        </div>
+
+        <div class="metric-value">
+            {{ asset_summary.active_assets }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Maintenance
+        </div>
+
+        <div class="metric-value">
+            {{ asset_summary.maintenance_assets }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Inactive
+        </div>
+
+        <div class="metric-value">
+            {{ asset_summary.inactive_assets }}
+        </div>
+    </div>
+
+</div>
+
+
+<div class="report-section">
+
+    <div class="report-section-heading">
+
+        <h2>
+            Available Reports
+        </h2>
+
+        <p>
+            Select a report to review infrastructure data.
+        </p>
+
+    </div>
+
+
+    <div class="report-card-grid">
+
+        <a
+            href="/reports/assets"
+            class="report-card"
+        >
+            <div class="report-card-title">
+                Asset Inventory
+            </div>
+
+            <div class="report-card-description">
+                Review the complete infrastructure asset inventory,
+                including type, address, environment, location,
+                platform, and operational status.
+            </div>
+
+            <div class="report-card-link">
+                View Report →
+            </div>
+        </a>
+
+
+        <div class="report-card report-card-disabled">
+
+            <div class="report-card-title">
+                Monitoring Report
+            </div>
+
+            <div class="report-card-description">
+                Availability, health status, and response time
+                reporting.
+            </div>
+
+            <div class="report-card-link">
+                Coming in Phase 6B
+            </div>
+
+        </div>
+
+
+        <div class="report-card report-card-disabled">
+
+            <div class="report-card-title">
+                Audit Activity
+            </div>
+
+            <div class="report-card-description">
+                Authentication and administrative activity
+                reporting.
+            </div>
+
+            <div class="report-card-link">
+                Coming in Phase 6C
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

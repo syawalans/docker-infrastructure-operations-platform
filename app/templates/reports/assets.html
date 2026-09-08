@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% set active_nav = "reports" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>
+            Asset Inventory Report
+        </h1>
+
+        <p>
+            Complete infrastructure asset inventory.
+        </p>
+    </div>
+
+    <a
+        href="/reports"
+        class="btn-secondary"
+    >
+        ← Back to Reports
+    </a>
+
+</div>
+
+
+<div class="metrics">
+
+    <div class="card">
+        <div class="metric-label">
+            Total Assets
+        </div>
+
+        <div class="metric-value">
+            {{ summary.total_assets }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Active
+        </div>
+
+        <div class="metric-value">
+            {{ summary.active_assets }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Maintenance
+        </div>
+
+        <div class="metric-value">
+            {{ summary.maintenance_assets }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Inactive
+        </div>
+
+        <div class="metric-value">
+            {{ summary.inactive_assets }}
+        </div>
+    </div>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+
+        <div>
+            Asset Inventory
+        </div>
+
+        <div class="result-count">
+
+            {{ assets | length }}
+
+            {% if assets | length == 1 %}
+                record
+            {% else %}
+                records
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="report-table-scroll">
+
+        <table class="report-inventory-table">
+
+            <thead>
+            <tr>
+                <th>Hostname</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>IP Address</th>
+                <th>Vendor / Model</th>
+                <th>Operating System</th>
+                <th>Environment</th>
+                <th>Location</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+
+
+            <tbody>
+
+            {% if assets %}
+
+                {% for asset in assets %}
+
+                <tr>
+
+                    <td>
+                        <a
+                            href="/assets/{{ asset.id }}"
+                            class="asset-link"
+                        >
+                            <strong>
+                                {{ asset.hostname }}
+                            </strong>
+                        </a>
+                    </td>
+
+                    <td>
+                        {{ asset.name }}
+                    </td>
+
+                    <td>
+                        {{ asset.asset_type }}
+                    </td>
+
+                    <td>
+                        {{ asset.ip_address }}
+                    </td>
+
+                    <td>
+                        {% if asset.vendor or asset.model %}
+
+                            {{ asset.vendor or "-" }}
+
+                            {% if asset.model %}
+                                / {{ asset.model }}
+                            {% endif %}
+
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ asset.operating_system or "-" }}
+                    </td>
+
+                    <td>
+                        <span class="badge">
+                            {{ asset.environment }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ asset.location or "-" }}
+                    </td>
+
+                    <td>
+                        <span class="status">
+
+                            <span
+                                class="status-dot
+                                {% if asset.status == 'Maintenance' %}
+                                    report-status-maintenance
+                                {% elif asset.status == 'Inactive' %}
+                                    report-status-inactive
+                                {% endif %}"
+                            ></span>
+
+                            {{ asset.status }}
+
+                        </span>
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+                    <td
+                        colspan="9"
+                        class="empty-state"
+                    >
+                        No infrastructure assets available.
+                    </td>
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
