@@ -380,3 +380,50 @@ th {
         width: 100%;
     }
 }
+
+.detail-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.detail-actions form {
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+}
+
+.detail-actions .btn,
+.detail-actions .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 16px;
+    margin: 0;
+    border: none;
+    border-radius: 7px;
+    white-space: nowrap;
+    font: inherit;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.detail-actions .btn-danger {
+    background: #c62828;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.detail-actions .btn-danger:hover {
+    background: #a91f1f;
+}
+
+@media (max-width: 760px) {
+    .detail-actions {
+        flex-wrap: wrap;
+    }
+}

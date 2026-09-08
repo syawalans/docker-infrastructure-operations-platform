@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Infrastructure Ops</div>
+
+        <div class="nav-title">Main</div>
+        <a href="/" class="nav-item">Dashboard</a>
+
+        <div class="nav-title">Assets</div>
+
+        <a href="/assets" class="nav-item">
+            All Assets
+        </a>
+
+        <a
+            href="/assets/servers"
+            class="nav-item {% if active_nav == 'servers' %}active{% endif %}"
+        >
+            Servers
+        </a>
+
+        <a
+            href="/assets/network"
+            class="nav-item {% if active_nav == 'network' %}active{% endif %}"
+        >
+            Network Devices
+        </a>
+
+        <a
+            href="/assets/virtual-machines"
+            class="nav-item {% if active_nav == 'virtual-machines' %}active{% endif %}"
+        >
+            Virtual Machines
+        </a>
+
+        <a
+            href="/assets/storage"
+            class="nav-item {% if active_nav == 'storage' %}active{% endif %}"
+        >
+            Storage
+        </a>
+
+        <div class="nav-title">System</div>
+        <a href="#" class="nav-item">Monitoring</a>
+        <a href="#" class="nav-item">Reports</a>
+        <a href="#" class="nav-item">Settings</a>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div></div>
+            <div class="user">Syawal Ans</div>
+        </header>
+
+        <section class="content">
+
+            <div class="page-header">
+                <div>
+                    <h1>{{ title }}</h1>
+                    <p>{{ description }}</p>
+                </div>
+
+                <a class="btn" href="/assets/new">
+                    + Add Asset
+                </a>
+            </div>
+
+            <div class="table-card">
+
+                <div class="table-header">
+                    <div>{{ title }}</div>
+
+                    <div class="result-count">
+                        {{ assets | length }}
+
+                        {% if assets | length == 1 %}
+                            asset
+                        {% else %}
+                            assets
+                        {% endif %}
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Hostname</th>
+                        <th>Type</th>
+                        <th>IP Address</th>
+                        <th>Vendor</th>
+                        <th>Environment</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {% if assets %}
+
+                        {% for asset in assets %}
+                        <tr>
+                            <td>
+                                <a
+                                    href="/assets/{{ asset.id }}"
+                                    class="asset-link"
+                                >
+                                    <strong>
+                                        {{ asset.hostname }}
+                                    </strong>
+                                </a>
+                            </td>
+
+                            <td>
+                                {{ asset.asset_type }}
+                            </td>
+
+                            <td>
+                                {{ asset.ip_address }}
+                            </td>
+
+                            <td>
+                                {{ asset.vendor or "-" }}
+                            </td>
+
+                            <td>
+                                <span class="badge">
+                                    {{ asset.environment }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ asset.status }}
+                            </td>
+
+                            <td>
+                                {{ asset.location or "-" }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    {% else %}
+
+                        <tr>
+                            <td
+                                colspan="7"
+                                class="empty-state"
+                            >
+                                No {{ title | lower }} assets available.
+                            </td>
+                        </tr>
+
+                    {% endif %}
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+</body>
+</html>

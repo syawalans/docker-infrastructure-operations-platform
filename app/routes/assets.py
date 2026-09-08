@@ -1,29 +1,26 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
-from app.core.config import settings
-from app.schemas.asset import AssetCreate
-from app.services.asset_service import asset_service
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from app.core.constants import (
-    ASSET_TYPES,
-    ENVIRONMENTS,
-    ASSET_STATUSES,
-)
-from fastapi import HTTPException
-
-from fastapi import Depends
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
+from app.core.constants import ASSET_STATUSES, ASSET_TYPES, ENVIRONMENTS
 from app.core.database import get_db
+from app.schemas.asset import AssetCreate
+from app.services.asset_service import asset_service
 
-router = APIRouter(prefix="/assets", tags=["Assets"])
+
+router = APIRouter(
+    prefix="/assets",
+    tags=["Assets"],
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-templates = Jinja2Templates(directory=BASE_DIR / "templates")
+templates = Jinja2Templates(
+    directory=BASE_DIR / "templates"
+)
 
 
 @router.get("", response_class=HTMLResponse)
@@ -59,8 +56,11 @@ def assets_list(
         },
     )
 
+
 @router.get("/new", response_class=HTMLResponse)
-def asset_create_form(request: Request):
+def asset_create_form(
+    request: Request,
+):
     return templates.TemplateResponse(
         request=request,
         name="assets/form.html",
@@ -76,6 +76,104 @@ def asset_create_form(request: Request):
             "statuses": ASSET_STATUSES,
         },
     )
+
+
+def render_asset_category(
+    request: Request,
+    db: Session,
+    *,
+    title: str,
+    description: str,
+    asset_types_filter: list[str],
+    active_nav: str,
+):
+    assets = []
+
+    for asset_type in asset_types_filter:
+        assets.extend(
+            asset_service.search_assets(
+                db=db,
+                asset_type=asset_type,
+            )
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="assets/category.html",
+        context={
+            "page_title": f"{title} - {settings.APP_NAME}",
+            "title": title,
+            "description": description,
+            "assets": assets,
+            "active_nav": active_nav,
+        },
+    )
+
+
+@router.get("/servers", response_class=HTMLResponse)
+def assets_servers(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    return render_asset_category(
+        request,
+        db,
+        title="Servers",
+        description="Physical server infrastructure assets.",
+        asset_types_filter=["Server"],
+        active_nav="servers",
+    )
+
+
+@router.get("/network", response_class=HTMLResponse)
+def assets_network(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    return render_asset_category(
+        request,
+        db,
+        title="Network Devices",
+        description="Network infrastructure and connectivity assets.",
+        asset_types_filter=[
+            "Switch",
+            "Router",
+            "Firewall",
+            "Access Point",
+        ],
+        active_nav="network",
+    )
+
+
+@router.get("/virtual-machines", response_class=HTMLResponse)
+def assets_virtual_machines(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    return render_asset_category(
+        request,
+        db,
+        title="Virtual Machines",
+        description="Virtualized infrastructure assets.",
+        asset_types_filter=["Virtual Machine"],
+        active_nav="virtual-machines",
+    )
+
+
+@router.get("/storage", response_class=HTMLResponse)
+def assets_storage(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    return render_asset_category(
+        request,
+        db,
+        title="Storage",
+        description="Storage infrastructure assets.",
+        asset_types_filter=["Storage"],
+        active_nav="storage",
+    )
+
 
 @router.get("/{asset_id}", response_class=HTMLResponse)
 def asset_detail(
@@ -102,6 +200,7 @@ def asset_detail(
             "asset": asset,
         },
     )
+
 
 @router.get("/{asset_id}/edit", response_class=HTMLResponse)
 def asset_edit_form(
@@ -136,26 +235,6 @@ def asset_edit_form(
         },
     )
 
-@router.post("/{asset_id}/delete")
-def asset_delete(
-    asset_id: int,
-    db: Session = Depends(get_db),
-):
-    deleted = asset_service.delete_asset(
-        db,
-        asset_id,
-    )
-
-    if not deleted:
-        raise HTTPException(
-            status_code=404,
-            detail="Asset not found",
-        )
-
-    return RedirectResponse(
-        url="/assets",
-        status_code=303,
-    )
 
 @router.post("/new")
 def asset_create(
@@ -195,6 +274,7 @@ def asset_create(
         url="/assets",
         status_code=303,
     )
+
 
 @router.post("/{asset_id}/edit")
 def asset_edit(
@@ -240,5 +320,27 @@ def asset_edit(
 
     return RedirectResponse(
         url=f"/assets/{asset.id}",
+        status_code=303,
+    )
+
+
+@router.post("/{asset_id}/delete")
+def asset_delete(
+    asset_id: int,
+    db: Session = Depends(get_db),
+):
+    deleted = asset_service.delete_asset(
+        db,
+        asset_id,
+    )
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Asset not found",
+        )
+
+    return RedirectResponse(
+        url="/assets",
         status_code=303,
     )

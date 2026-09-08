@@ -18,6 +18,10 @@
 
         <div class="nav-title">Assets</div>
         <a href="/assets" class="nav-item active">All Assets</a>
+        <a href="/assets/servers" class="nav-item">Servers</a>
+        <a href="/assets/network" class="nav-item">Network Devices</a>
+        <a href="/assets/virtual-machines" class="nav-item">Virtual Machines</a>
+        <a href="/assets/storage" class="nav-item">Storage</a>
 
         <div class="nav-title">System</div>
         <a href="#" class="nav-item">Monitoring</a>
@@ -70,15 +74,18 @@
                     <div class="form-group">
                         <label>Asset Type</label>
 
-                        <select name="asset_type" required>
-                            <option value="">Select type</option>
+                        <select
+                            name="asset_type"
+                            required
+                        >
+                            <option value="">
+                                Select type
+                            </option>
 
                             {% for asset_type in asset_types %}
                             <option
                                 value="{{ asset_type }}"
-                                {% if asset and asset.asset_type == asset_type %}
-                                selected
-                                {% endif %}
+                                {% if asset and asset.asset_type == asset_type %}selected{% endif %}
                             >
                                 {{ asset_type }}
                             </option>
@@ -101,7 +108,7 @@
 
                         <input
                             name="vendor"
-                            value="{{ asset.vendor or '' if asset else '' }}"
+                            value="{{ (asset.vendor or '') if asset else '' }}"
                         >
                     </div>
 
@@ -110,7 +117,7 @@
 
                         <input
                             name="model"
-                            value="{{ asset.model or '' if asset else '' }}"
+                            value="{{ (asset.model or '') if asset else '' }}"
                         >
                     </div>
 
@@ -119,22 +126,25 @@
 
                         <input
                             name="operating_system"
-                            value="{{ asset.operating_system or '' if asset else '' }}"
+                            value="{{ (asset.operating_system or '') if asset else '' }}"
                         >
                     </div>
 
                     <div class="form-group">
                         <label>Environment</label>
 
-                        <select name="environment" required>
-                            <option value="">Select environment</option>
+                        <select
+                            name="environment"
+                            required
+                        >
+                            <option value="">
+                                Select environment
+                            </option>
 
                             {% for environment in environments %}
                             <option
                                 value="{{ environment }}"
-                                {% if asset and asset.environment == environment %}
-                                selected
-                                {% endif %}
+                                {% if asset and asset.environment == environment %}selected{% endif %}
                             >
                                 {{ environment }}
                             </option>
@@ -145,15 +155,18 @@
                     <div class="form-group">
                         <label>Status</label>
 
-                        <select name="status" required>
-                            <option value="">Select status</option>
+                        <select
+                            name="status"
+                            required
+                        >
+                            <option value="">
+                                Select status
+                            </option>
 
                             {% for status in statuses %}
                             <option
                                 value="{{ status }}"
-                                {% if asset and asset.status == status %}
-                                selected
-                                {% endif %}
+                                {% if asset and asset.status == status %}selected{% endif %}
                             >
                                 {{ status }}
                             </option>
@@ -166,7 +179,7 @@
 
                         <input
                             name="location"
-                            value="{{ asset.location or '' if asset else '' }}"
+                            value="{{ (asset.location or '') if asset else '' }}"
                         >
                     </div>
 
@@ -178,10 +191,11 @@
                     <textarea
                         name="description"
                         rows="4"
-                    >{{ asset.description or '' if asset else '' }}</textarea>
+                    >{{ (asset.description or '') if asset else '' }}</textarea>
                 </div>
 
                 <div class="form-actions">
+
                     <a
                         href="{{ '/assets/' ~ asset.id if asset else '/assets' }}"
                         class="btn-secondary"
@@ -189,14 +203,19 @@
                         Cancel
                     </a>
 
-                    <button type="submit" class="btn">
+                    <button
+                        type="submit"
+                        class="btn"
+                    >
                         {{ submit_label }}
                     </button>
+
                 </div>
 
             </form>
 
         </section>
+
     </main>
 
 </div>

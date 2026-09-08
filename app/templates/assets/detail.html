@@ -18,6 +18,10 @@
 
         <div class="nav-title">Assets</div>
         <a href="/assets" class="nav-item active">All Assets</a>
+        <a href="/assets/servers" class="nav-item">Servers</a>
+        <a href="/assets/network" class="nav-item">Network Devices</a>
+        <a href="/assets/virtual-machines" class="nav-item">Virtual Machines</a>
+        <a href="/assets/storage" class="nav-item">Storage</a>
 
         <div class="nav-title">System</div>
         <a href="#" class="nav-item">Monitoring</a>
@@ -40,21 +44,33 @@
                     <p>Infrastructure asset details.</p>
                 </div>
 
-                <div>
-                    <a href="/assets" class="btn-secondary">Back</a>
-                    <a href="/assets/{{ asset.id }}/edit" class="btn">
-                        Edit Asset
-                        <form
-                             action="/assets/{{ asset.id }}/delete"
-                             method="post"
-                             onsubmit="return confirm('Are you sure you want to delete this asset?');"
-                             style="display: inline;"
->
-                             <button type="submit" class="btn btn-danger">
-                              Delete Asset
-                             </button>
-                        </form>
+                <div class="detail-actions">
+                    <a
+                        href="/assets"
+                        class="btn-secondary"
+                    >
+                        Back
                     </a>
+
+                    <a
+                        href="/assets/{{ asset.id }}/edit"
+                        class="btn"
+                    >
+                        Edit Asset
+                    </a>
+
+                    <form
+                        action="/assets/{{ asset.id }}/delete"
+                        method="post"
+                        onsubmit="return confirm('Are you sure you want to delete this asset?');"
+                    >
+                        <button
+                            type="submit"
+                            class="btn btn-danger"
+                        >
+                            Delete Asset
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -122,6 +138,7 @@
             </div>
 
         </section>
+
     </main>
 
 </div>
