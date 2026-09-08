@@ -16,7 +16,18 @@ COPY app/requirements.txt /tmp/requirements.txt
 RUN pip install --upgrade pip \
     && pip install -r /tmp/requirements.txt
 
+RUN groupadd --system appgroup \
+    && useradd --system \
+        --gid appgroup \
+        --home-dir /workspace \
+        --shell /usr/sbin/nologin \
+        appuser
+
 COPY app /workspace/app
+
+RUN chown -R appuser:appgroup /workspace
+
+USER appuser
 
 EXPOSE 8088
 
