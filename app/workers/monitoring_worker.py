@@ -1,4 +1,5 @@
 import logging
+import signal
 import threading
 
 from app.core.config import settings
@@ -6,57 +7,37 @@ from app.core.database import SessionLocal
 from app.services.monitoring_service import monitoring_service
 
 
+logging.basicConfig(
+    level=logging.INFO,
+    format=(
+        "%(asctime)s | %(levelname)s | "
+        "%(name)s | %(message)s"
+    ),
+)
+
 logger = logging.getLogger(__name__)
 
 
-class MonitoringScheduler:
+class MonitoringWorker:
     def __init__(self):
-        self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
 
-    def start(self) -> None:
-        if not settings.MONITORING_SCHEDULER_ENABLED:
-            logger.info(
-                "Monitoring scheduler is disabled."
-            )
-            return
-
-        if (
-            self._thread is not None
-            and self._thread.is_alive()
-        ):
-            return
-
-        self._stop_event.clear()
-
-        self._thread = threading.Thread(
-            target=self._run_loop,
-            name="monitoring-scheduler",
-            daemon=True,
-        )
-
-        self._thread.start()
-
-        logger.info(
-            "Monitoring scheduler started."
-        )
-
     def stop(self) -> None:
+        logger.info(
+            "Shutdown signal received."
+        )
         self._stop_event.set()
 
-        if self._thread is not None:
-            self._thread.join(
-                timeout=10,
-            )
-
-        logger.info(
-            "Monitoring scheduler stopped."
-        )
-
-    def _run_loop(self) -> None:
+    def run(self) -> None:
         poll_seconds = max(
             1,
             settings.MONITORING_SCHEDULER_POLL_SECONDS,
+        )
+
+        logger.info(
+            "Monitoring worker started. "
+            "Poll interval: %s seconds.",
+            poll_seconds,
         )
 
         while not self._stop_event.is_set():
@@ -65,6 +46,10 @@ class MonitoringScheduler:
             self._stop_event.wait(
                 poll_seconds
             )
+
+        logger.info(
+            "Monitoring worker stopped."
+        )
 
     def _run_cycle(self) -> None:
         db = SessionLocal()
@@ -87,11 +72,36 @@ class MonitoringScheduler:
             db.rollback()
 
             logger.exception(
-                "Monitoring scheduler cycle failed."
+                "Monitoring worker cycle failed."
             )
 
         finally:
             db.close()
 
 
-monitoring_scheduler = MonitoringScheduler()
+worker = MonitoringWorker()
+
+
+def handle_shutdown(
+    signum,
+    frame,
+) -> None:
+    worker.stop()
+
+
+def main() -> None:
+    signal.signal(
+        signal.SIGINT,
+        handle_shutdown,
+    )
+
+    signal.signal(
+        signal.SIGTERM,
+        handle_shutdown,
+    )
+
+    worker.run()
+
+
+if __name__ == "__main__":
+    main()
