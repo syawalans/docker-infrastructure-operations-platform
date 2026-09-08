@@ -24,5 +24,12 @@ class Settings:
         )
     )
 
+    AUTH_SESSION_LIFETIME_HOURS = int(
+        os.getenv(
+            "AUTH_SESSION_LIFETIME_HOURS",
+            "8",
+        )
+    )
+
 
 settings = Settings()

@@ -10,6 +10,10 @@ from app.models.monitoring import (
     MonitoringConfigModel,
     MonitoringResultModel,
 )
+from app.models.user import (
+    UserModel,
+    UserSessionModel,
+)
 from app.routes.assets import router as assets_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.monitoring import router as monitoring_router

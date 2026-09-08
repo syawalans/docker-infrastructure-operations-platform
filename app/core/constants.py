@@ -35,3 +35,14 @@ MONITORING_STATUSES = [
     "DOWN",
     "UNKNOWN",
 ]
+
+
+ROLE_ADMINISTRATOR = "Administrator"
+ROLE_OPERATOR = "Operator"
+ROLE_VIEWER = "Viewer"
+
+USER_ROLES = [
+    ROLE_ADMINISTRATOR,
+    ROLE_OPERATOR,
+    ROLE_VIEWER,
+]
