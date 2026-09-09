@@ -56,6 +56,32 @@ def reports_overview(
     )
 
 
+@router.get("/audit")
+def audit_activity_report(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(
+        require_permission(
+            PERMISSION_REPORT_VIEW
+        )
+    ),
+):
+    data = report_service.get_audit_activity_report(
+        db
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="reports/audit.html",
+        context={
+            "page_title": "Audit Activity Report",
+            "active_nav": "reports",
+            "current_user": current_user,
+            **data,
+        },
+    )
+
+
 @router.get("/monitoring")
 def monitoring_report(
     request: Request,

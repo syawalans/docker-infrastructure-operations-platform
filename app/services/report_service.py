@@ -168,4 +168,78 @@ class ReportService:
         }
 
 
+    def get_audit_activity_report(
+        self,
+        db: Session,
+    ) -> dict:
+        summary = (
+            report_repository.get_audit_summary(
+                db
+            )
+        )
+
+        rows = (
+            report_repository.get_recent_audit_activity(
+                db,
+                limit=50,
+            )
+        )
+
+        items = []
+
+        categories = {
+            "authentication": 0,
+            "assets": 0,
+            "monitoring": 0,
+            "users": 0,
+            "other": 0,
+        }
+
+        for row in rows:
+            resource_type = (
+                row.resource_type or ""
+            ).upper()
+
+            if resource_type == "AUTHENTICATION":
+                category = "authentication"
+            elif resource_type == "ASSET":
+                category = "assets"
+            elif resource_type in {
+                "MONITORING_CONFIG",
+                "MONITORING_RESULT",
+            }:
+                category = "monitoring"
+            elif resource_type == "USER":
+                category = "users"
+            else:
+                category = "other"
+
+            categories[category] += 1
+
+            items.append(
+                {
+                    "id": row.id,
+                    "actor_username": (
+                        row.actor_username
+                        or "System"
+                    ),
+                    "action": row.action,
+                    "resource_type": row.resource_type,
+                    "resource_id": row.resource_id,
+                    "status": row.status,
+                    "ip_address": (
+                        row.ip_address
+                        or "-"
+                    ),
+                    "created_at": row.created_at,
+                }
+            )
+
+        return {
+            "summary": summary,
+            "items": items,
+            "categories": categories,
+        }
+
+
 report_service = ReportService()

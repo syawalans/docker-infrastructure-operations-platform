@@ -2,6 +2,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.asset import AssetModel
+from app.models.audit import AuditLogModel
 from app.models.monitoring import (
     MonitoringConfigModel,
     MonitoringResultModel,
@@ -201,6 +202,76 @@ class ReportRepository:
             }
             for asset, result in rows
         ]
+
+
+    def get_audit_summary(
+        self,
+        db: Session,
+    ) -> dict:
+        total_events = db.scalar(
+            select(
+                func.count(
+                    AuditLogModel.id
+                )
+            )
+        ) or 0
+
+        success_events = db.scalar(
+            select(
+                func.count(
+                    AuditLogModel.id
+                )
+            ).where(
+                AuditLogModel.status == "SUCCESS"
+            )
+        ) or 0
+
+        failure_events = db.scalar(
+            select(
+                func.count(
+                    AuditLogModel.id
+                )
+            ).where(
+                AuditLogModel.status == "FAILURE"
+            )
+        ) or 0
+
+        blocked_events = db.scalar(
+            select(
+                func.count(
+                    AuditLogModel.id
+                )
+            ).where(
+                AuditLogModel.status == "BLOCKED"
+            )
+        ) or 0
+
+        return {
+            "total_events": total_events,
+            "success_events": success_events,
+            "failure_events": failure_events,
+            "blocked_events": blocked_events,
+        }
+
+    def get_recent_audit_activity(
+        self,
+        db: Session,
+        limit: int = 50,
+    ) -> list[AuditLogModel]:
+        statement = (
+            select(AuditLogModel)
+            .order_by(
+                AuditLogModel.created_at.desc(),
+                AuditLogModel.id.desc(),
+            )
+            .limit(limit)
+        )
+
+        return list(
+            db.execute(
+                statement
+            ).scalars().all()
+        )
 
 
 report_repository = ReportRepository()

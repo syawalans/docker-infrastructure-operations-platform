@@ -1045,3 +1045,83 @@ a.report-card:hover {
         max-height: 380px;
     }
 }
+
+/* Audit Activity Report */
+
+.audit-breakdown-section {
+    margin-top: 30px;
+}
+
+.audit-category-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.audit-history-card {
+    margin-top: 30px;
+}
+
+.audit-history-scroll {
+    max-height: 460px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.audit-history-table {
+    min-width: 1050px;
+}
+
+.audit-history-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8fafc;
+}
+
+.audit-history-table td {
+    vertical-align: middle;
+}
+
+.audit-action,
+.audit-ip {
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+    font-size: 13px;
+}
+
+.audit-resource-id {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.status-dot.audit-status-failure {
+    background: #ef4444;
+}
+
+.status-dot.audit-status-blocked {
+    background: #f59e0b;
+}
+
+@media (max-width: 1250px) {
+    .audit-category-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .audit-category-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .audit-history-scroll {
+        max-height: 380px;
+    }
+}

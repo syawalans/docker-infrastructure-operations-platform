@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% set active_nav = "reports" %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1>Audit Activity Report</h1>
+
+        <p>
+            Authentication, administrative, and infrastructure
+            activity reporting.
+        </p>
+    </div>
+
+    <a
+        href="/reports"
+        class="btn-secondary"
+    >
+        ← Back to Reports
+    </a>
+
+</div>
+
+
+<div class="metrics">
+
+    <div class="card">
+        <div class="metric-label">
+            Total Events
+        </div>
+
+        <div class="metric-value">
+            {{ summary.total_events }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Successful
+        </div>
+
+        <div class="metric-value">
+            {{ summary.success_events }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Failed
+        </div>
+
+        <div class="metric-value">
+            {{ summary.failure_events }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">
+            Blocked
+        </div>
+
+        <div class="metric-value">
+            {{ summary.blocked_events }}
+        </div>
+    </div>
+
+</div>
+
+
+<div class="report-section audit-breakdown-section">
+
+    <div class="report-section-heading">
+        <h2>Activity Breakdown</h2>
+
+        <p>
+            Recent audit events grouped by operational category.
+        </p>
+    </div>
+
+
+    <div class="audit-category-grid">
+
+        <div class="card">
+            <div class="metric-label">
+                Authentication
+            </div>
+
+            <div class="metric-value">
+                {{ categories.authentication }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">
+                Assets
+            </div>
+
+            <div class="metric-value">
+                {{ categories.assets }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">
+                Monitoring
+            </div>
+
+            <div class="metric-value">
+                {{ categories.monitoring }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">
+                Users
+            </div>
+
+            <div class="metric-value">
+                {{ categories.users }}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="metric-label">
+                Other
+            </div>
+
+            <div class="metric-value">
+                {{ categories.other }}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="table-card audit-history-card">
+
+    <div class="table-header">
+
+        <div>
+            Recent Audit Activity
+        </div>
+
+        <div class="result-count">
+            Latest {{ items | length }} events
+        </div>
+
+    </div>
+
+
+    <div class="report-table-scroll audit-history-scroll">
+
+        <table class="audit-history-table">
+
+            <thead>
+            <tr>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Resource</th>
+                <th>Status</th>
+                <th>IP Address</th>
+                <th>Timestamp</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            {% if items %}
+
+                {% for item in items %}
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            {{ item.actor_username }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        <span class="audit-action">
+                            {{ item.action }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ item.resource_type }}
+
+                        {% if item.resource_id %}
+                            <span class="audit-resource-id">
+                                #{{ item.resource_id }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <span class="status">
+
+                            <span
+                                class="status-dot
+                                {% if item.status == 'FAILURE' %}
+                                    audit-status-failure
+                                {% elif item.status == 'BLOCKED' %}
+                                    audit-status-blocked
+                                {% endif %}"
+                            ></span>
+
+                            {{ item.status }}
+
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="audit-ip">
+                            {{ item.ip_address }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {{ item.created_at.strftime(
+                            "%Y-%m-%d %H:%M:%S UTC"
+                        ) }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <tr>
+                    <td
+                        colspan="6"
+                        class="empty-state"
+                    >
+                        No audit activity available.
+                    </td>
+                </tr>
+
+            {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
