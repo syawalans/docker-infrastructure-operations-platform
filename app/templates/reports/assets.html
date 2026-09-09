@@ -71,6 +71,174 @@
 </div>
 
 
+<div class="report-filter-card">
+
+    <form
+        method="get"
+        action="/reports/assets"
+        class="report-filter-form"
+    >
+
+        <div class="report-filter-search">
+
+            <label for="report-q">
+                Search
+            </label>
+
+            <input
+                id="report-q"
+                type="search"
+                name="q"
+                value="{{ filters.q }}"
+                placeholder="Hostname, name, IP, vendor, model"
+            >
+
+        </div>
+
+
+        <div class="report-filter-field">
+
+            <label for="report-asset-type">
+                Asset Type
+            </label>
+
+            <select
+                id="report-asset-type"
+                name="asset_type"
+            >
+                <option value="">
+                    All Types
+                </option>
+
+                {% for value in filter_options.asset_types %}
+                    <option
+                        value="{{ value }}"
+                        {% if filters.asset_type == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ value }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="report-filter-field">
+
+            <label for="report-environment">
+                Environment
+            </label>
+
+            <select
+                id="report-environment"
+                name="environment"
+            >
+                <option value="">
+                    All Environments
+                </option>
+
+                {% for value in filter_options.environments %}
+                    <option
+                        value="{{ value }}"
+                        {% if filters.environment == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ value }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="report-filter-field">
+
+            <label for="report-status">
+                Status
+            </label>
+
+            <select
+                id="report-status"
+                name="status"
+            >
+                <option value="">
+                    All Statuses
+                </option>
+
+                {% for value in filter_options.statuses %}
+                    <option
+                        value="{{ value }}"
+                        {% if filters.status == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ value }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="report-filter-field">
+
+            <label for="report-location">
+                Location
+            </label>
+
+            <select
+                id="report-location"
+                name="location"
+            >
+                <option value="">
+                    All Locations
+                </option>
+
+                {% for value in filter_options.locations %}
+                    <option
+                        value="{{ value }}"
+                        {% if filters.location == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ value }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="report-filter-actions">
+
+            <button
+                type="submit"
+                class="btn-primary"
+            >
+                Apply Filters
+            </button>
+
+            <a
+                href="/reports/assets"
+                class="btn-secondary"
+            >
+                Reset
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
 <div class="table-card">
 
     <div class="table-header">

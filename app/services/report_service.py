@@ -1,3 +1,5 @@
+from datetime import datetime, time, timezone
+
 from sqlalchemy.orm import Session
 
 from app.repositories.report_repository import (
@@ -21,28 +23,103 @@ class ReportService:
     def get_asset_inventory_report(
         self,
         db: Session,
+        *,
+        q: str | None = None,
+        asset_type: str | None = None,
+        environment: str | None = None,
+        status: str | None = None,
+        location: str | None = None,
     ) -> dict:
+        filters = {
+            "q": (q or "").strip(),
+            "asset_type": asset_type or "",
+            "environment": environment or "",
+            "status": status or "",
+            "location": location or "",
+        }
+
+        query_filters = {
+            key: value or None
+            for key, value in filters.items()
+        }
+
         return {
             "summary": (
                 report_repository.get_asset_summary(
-                    db
+                    db,
+                    **query_filters,
                 )
             ),
             "assets": (
                 report_repository.get_asset_inventory(
+                    db,
+                    **query_filters,
+                )
+            ),
+            "filter_options": (
+                report_repository.get_asset_filter_options(
                     db
                 )
             ),
+            "filters": filters,
         }
 
 
     def get_monitoring_report(
         self,
         db: Session,
+        *,
+        q: str | None = None,
+        status: str | None = None,
+        check_type: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
     ) -> dict:
+        filters = {
+            "q": (q or "").strip(),
+            "status": status or "",
+            "check_type": check_type or "",
+            "date_from": date_from or "",
+            "date_to": date_to or "",
+        }
+
+        parsed_date_from = None
+        parsed_date_to = None
+
+        if filters["date_from"]:
+            try:
+                parsed_date_from = datetime.combine(
+                    datetime.strptime(
+                        filters["date_from"],
+                        "%Y-%m-%d",
+                    ).date(),
+                    time.min,
+                    tzinfo=timezone.utc,
+                )
+            except ValueError:
+                filters["date_from"] = ""
+
+        if filters["date_to"]:
+            try:
+                parsed_date_to = datetime.combine(
+                    datetime.strptime(
+                        filters["date_to"],
+                        "%Y-%m-%d",
+                    ).date(),
+                    time.max,
+                    tzinfo=timezone.utc,
+                )
+            except ValueError:
+                filters["date_to"] = ""
+
         rows = (
             report_repository.get_monitoring_report(
-                db
+                db,
+                q=filters["q"] or None,
+                status=filters["status"] or None,
+                check_type=(
+                    filters["check_type"] or None
+                ),
             )
         )
 
@@ -104,7 +181,14 @@ class ReportService:
 
         history_summary = (
             report_repository.get_monitoring_history_summary(
-                db
+                db,
+                q=filters["q"] or None,
+                status=filters["status"] or None,
+                check_type=(
+                    filters["check_type"] or None
+                ),
+                date_from=parsed_date_from,
+                date_to=parsed_date_to,
             )
         )
 
@@ -127,6 +211,13 @@ class ReportService:
         recent_rows = (
             report_repository.get_recent_monitoring_history(
                 db,
+                q=filters["q"] or None,
+                status=filters["status"] or None,
+                check_type=(
+                    filters["check_type"] or None
+                ),
+                date_from=parsed_date_from,
+                date_to=parsed_date_to,
                 limit=20,
             )
         )
@@ -165,57 +256,100 @@ class ReportService:
             "items": items,
             "performance": performance,
             "history_items": history_items,
+            "filters": filters,
+            "filter_options": (
+                report_repository.get_monitoring_filter_options(
+                    db
+                )
+            ),
         }
 
 
     def get_audit_activity_report(
         self,
         db: Session,
+        *,
+        actor: str | None = None,
+        action: str | None = None,
+        resource_type: str | None = None,
+        status: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
     ) -> dict:
+        filters = {
+            "actor": (actor or "").strip(),
+            "action": action or "",
+            "resource_type": resource_type or "",
+            "status": status or "",
+            "date_from": date_from or "",
+            "date_to": date_to or "",
+        }
+
+        parsed_date_from = None
+        parsed_date_to = None
+
+        if filters["date_from"]:
+            try:
+                parsed_date_from = datetime.combine(
+                    datetime.strptime(
+                        filters["date_from"],
+                        "%Y-%m-%d",
+                    ).date(),
+                    time.min,
+                    tzinfo=timezone.utc,
+                )
+            except ValueError:
+                filters["date_from"] = ""
+
+        if filters["date_to"]:
+            try:
+                parsed_date_to = datetime.combine(
+                    datetime.strptime(
+                        filters["date_to"],
+                        "%Y-%m-%d",
+                    ).date(),
+                    time.max,
+                    tzinfo=timezone.utc,
+                )
+            except ValueError:
+                filters["date_to"] = ""
+
+        query_filters = {
+            "actor": filters["actor"] or None,
+            "action": filters["action"] or None,
+            "resource_type": (
+                filters["resource_type"] or None
+            ),
+            "status": filters["status"] or None,
+            "date_from": parsed_date_from,
+            "date_to": parsed_date_to,
+        }
+
         summary = (
             report_repository.get_audit_summary(
-                db
+                db,
+                **query_filters,
+            )
+        )
+
+        categories = (
+            report_repository.get_audit_breakdown(
+                db,
+                **query_filters,
             )
         )
 
         rows = (
             report_repository.get_recent_audit_activity(
                 db,
+                **query_filters,
                 limit=50,
             )
         )
 
         items = []
 
-        categories = {
-            "authentication": 0,
-            "assets": 0,
-            "monitoring": 0,
-            "users": 0,
-            "other": 0,
-        }
-
         for row in rows:
-            resource_type = (
-                row.resource_type or ""
-            ).upper()
-
-            if resource_type == "AUTHENTICATION":
-                category = "authentication"
-            elif resource_type == "ASSET":
-                category = "assets"
-            elif resource_type in {
-                "MONITORING_CONFIG",
-                "MONITORING_RESULT",
-            }:
-                category = "monitoring"
-            elif resource_type == "USER":
-                category = "users"
-            else:
-                category = "other"
-
-            categories[category] += 1
-
             items.append(
                 {
                     "id": row.id,
@@ -239,6 +373,12 @@ class ReportService:
             "summary": summary,
             "items": items,
             "categories": categories,
+            "filters": filters,
+            "filter_options": (
+                report_repository.get_audit_filter_options(
+                    db
+                )
+            ),
         }
 
 

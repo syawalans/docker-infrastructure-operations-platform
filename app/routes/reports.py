@@ -59,6 +59,12 @@ def reports_overview(
 @router.get("/audit")
 def audit_activity_report(
     request: Request,
+    actor: str | None = None,
+    action: str | None = None,
+    resource_type: str | None = None,
+    status: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(
         require_permission(
@@ -67,7 +73,13 @@ def audit_activity_report(
     ),
 ):
     data = report_service.get_audit_activity_report(
-        db
+        db,
+        actor=actor,
+        action=action,
+        resource_type=resource_type,
+        status=status,
+        date_from=date_from,
+        date_to=date_to,
     )
 
     return templates.TemplateResponse(
@@ -85,6 +97,11 @@ def audit_activity_report(
 @router.get("/monitoring")
 def monitoring_report(
     request: Request,
+    q: str | None = None,
+    status: str | None = None,
+    check_type: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(
         require_permission(
@@ -93,7 +110,12 @@ def monitoring_report(
     ),
 ):
     data = report_service.get_monitoring_report(
-        db
+        db,
+        q=q,
+        status=status,
+        check_type=check_type,
+        date_from=date_from,
+        date_to=date_to,
     )
 
     return templates.TemplateResponse(
@@ -111,6 +133,11 @@ def monitoring_report(
 @router.get("/assets")
 def asset_inventory_report(
     request: Request,
+    q: str | None = None,
+    asset_type: str | None = None,
+    environment: str | None = None,
+    status: str | None = None,
+    location: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(
         require_permission(
@@ -120,7 +147,12 @@ def asset_inventory_report(
 ):
     data = (
         report_service.get_asset_inventory_report(
-            db
+            db,
+            q=q,
+            asset_type=asset_type,
+            environment=environment,
+            status=status,
+            location=location,
         )
     )
 

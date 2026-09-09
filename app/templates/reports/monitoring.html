@@ -72,6 +72,153 @@
 </div>
 
 
+<div class="report-filter-card">
+
+    <form
+        method="get"
+        action="/reports/monitoring"
+        class="report-filter-form monitoring-filter-form"
+    >
+
+        <div class="report-filter-search">
+
+            <label for="monitoring-q">
+                Search
+            </label>
+
+            <input
+                id="monitoring-q"
+                type="search"
+                name="q"
+                value="{{ filters.q }}"
+                placeholder="Hostname, target, IP"
+            >
+
+        </div>
+
+
+        <div class="report-filter-field">
+
+            <label for="monitoring-status">
+                Status
+            </label>
+
+            <select
+                id="monitoring-status"
+                name="status"
+            >
+                <option value="">
+                    All Statuses
+                </option>
+
+                {% for value in filter_options.statuses %}
+                    <option
+                        value="{{ value }}"
+                        {% if filters.status == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ value }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="report-filter-field">
+
+            <label for="monitoring-check-type">
+                Check Type
+            </label>
+
+            <select
+                id="monitoring-check-type"
+                name="check_type"
+            >
+                <option value="">
+                    All Checks
+                </option>
+
+                {% for value in filter_options.check_types %}
+                    <option
+                        value="{{ value }}"
+                        {% if filters.check_type == value %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ value }}
+                    </option>
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="report-filter-field">
+
+            <label for="monitoring-date-from">
+                Date From
+            </label>
+
+            <input
+                id="monitoring-date-from"
+                type="date"
+                name="date_from"
+                value="{{ filters.date_from }}"
+            >
+
+        </div>
+
+
+        <div class="report-filter-field">
+
+            <label for="monitoring-date-to">
+                Date To
+            </label>
+
+            <input
+                id="monitoring-date-to"
+                type="date"
+                name="date_to"
+                value="{{ filters.date_to }}"
+            >
+
+        </div>
+
+
+        <div class="report-filter-actions">
+
+            <button
+                type="submit"
+                class="btn-primary"
+            >
+                Apply Filters
+            </button>
+
+            <a
+                href="/reports/monitoring"
+                class="btn-secondary"
+            >
+                Reset
+            </a>
+
+        </div>
+
+    </form>
+
+
+    <div class="report-filter-note">
+        Date range applies to historical performance and
+        monitoring history. Current monitoring status always
+        shows the latest available check.
+    </div>
+
+</div>
+
+
 <div class="table-card">
 
     <div class="table-header">
