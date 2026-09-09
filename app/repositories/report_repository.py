@@ -450,7 +450,7 @@ class ReportRepository:
         check_type: str | None = None,
         date_from=None,
         date_to=None,
-        limit: int = 20,
+        limit: int | None = 20,
     ) -> list[dict]:
         statement = (
             select(
@@ -475,14 +475,15 @@ class ReportRepository:
             )
         )
 
-        statement = (
-            statement
-            .order_by(
-                MonitoringResultModel.checked_at.desc(),
-                MonitoringResultModel.id.desc(),
-            )
-            .limit(limit)
+        statement = statement.order_by(
+            MonitoringResultModel.checked_at.desc(),
+            MonitoringResultModel.id.desc(),
         )
+
+        if limit is not None:
+            statement = statement.limit(
+                limit
+            )
 
         rows = db.execute(statement).all()
 
@@ -731,7 +732,7 @@ class ReportRepository:
         status: str | None = None,
         date_from=None,
         date_to=None,
-        limit: int = 50,
+        limit: int | None = 50,
     ) -> list[AuditLogModel]:
         statement = select(
             AuditLogModel
@@ -747,14 +748,15 @@ class ReportRepository:
             date_to=date_to,
         )
 
-        statement = (
-            statement
-            .order_by(
-                AuditLogModel.created_at.desc(),
-                AuditLogModel.id.desc(),
-            )
-            .limit(limit)
+        statement = statement.order_by(
+            AuditLogModel.created_at.desc(),
+            AuditLogModel.id.desc(),
         )
+
+        if limit is not None:
+            statement = statement.limit(
+                limit
+            )
 
         return list(
             db.execute(

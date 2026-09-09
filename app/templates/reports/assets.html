@@ -16,12 +16,23 @@
         </p>
     </div>
 
-    <a
-        href="/reports"
-        class="btn-secondary"
-    >
-        ← Back to Reports
-    </a>
+    <div class="page-header-actions">
+
+        <a
+            href="/reports/assets/export.csv?q={{ filters.q | urlencode }}&asset_type={{ filters.asset_type | urlencode }}&environment={{ filters.environment | urlencode }}&status={{ filters.status | urlencode }}&location={{ filters.location | urlencode }}"
+            class="btn-primary"
+        >
+            Export CSV
+        </a>
+
+        <a
+            href="/reports"
+            class="btn-secondary"
+        >
+            ← Back to Reports
+        </a>
+
+    </div>
 
 </div>
 

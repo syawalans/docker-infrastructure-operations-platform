@@ -1292,3 +1292,59 @@ a.report-card:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* Report Header Actions */
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+    .page-header-actions {
+        width: 100%;
+    }
+
+    .page-header-actions .btn-primary,
+    .page-header-actions .btn-secondary {
+        flex: 1;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+/* Report Export Action */
+
+.page-header-actions a.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid #2563eb;
+    border-radius: 8px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.page-header-actions a.btn-primary:hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.page-header-actions a.btn-primary:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
