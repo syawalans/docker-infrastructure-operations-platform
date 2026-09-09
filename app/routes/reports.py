@@ -14,6 +14,12 @@ from app.core.template_context import (
     configure_template_permissions,
 )
 from app.models.user import UserModel
+from app.services.executive_report_service import (
+    executive_report_service,
+)
+from app.services.executive_pdf_service import (
+    executive_pdf_service,
+)
 from app.services.report_export_service import (
     report_export_service,
 )
@@ -57,6 +63,77 @@ def reports_overview(
             "current_user": current_user,
             **data,
         },
+    )
+
+
+@router.get("/executive.pdf")
+def executive_report_pdf(
+    date_from: str | None = None,
+    date_to: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(
+        require_permission(
+            PERMISSION_REPORT_VIEW
+        )
+    ),
+):
+    data = (
+        executive_report_service
+        .get_executive_report(
+            db,
+            date_from=date_from,
+            date_to=date_to,
+        )
+    )
+
+    generated_by = (
+        current_user.full_name
+        or current_user.username
+    )
+
+    content, filename = (
+        executive_pdf_service.generate_pdf(
+            data,
+            generated_by=generated_by,
+        )
+    )
+
+    return Response(
+        content=content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="{filename}"'
+            )
+        },
+    )
+
+
+@router.get("/executive")
+def executive_report(
+    request: Request,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(
+        require_permission(
+            PERMISSION_REPORT_VIEW
+        )
+    ),
+):
+    data = (
+        executive_report_service
+        .get_executive_report(
+            db,
+            date_from=date_from,
+            date_to=date_to,
+        )
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="reports/executive.html",
+        context=data,
     )
 
 

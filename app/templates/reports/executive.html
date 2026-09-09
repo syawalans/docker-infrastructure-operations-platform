@@ -1,0 +1,648 @@
+{% extends "base.html" %}
+
+{% set active_nav = "reports" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>Executive Infrastructure Report</h1>
+        <p>
+            High-level infrastructure operations,
+            availability, and security assessment.
+        </p>
+    </div>
+
+    <div class="page-header-actions">
+        <a
+            href="/reports/executive.pdf?date_from={{ reporting_period.date_from or '' | urlencode }}&date_to={{ reporting_period.date_to or '' | urlencode }}"
+            class="btn-primary"
+        >
+            Download PDF
+        </a>
+
+        <a
+            href="/reports"
+            class="btn-secondary"
+        >
+            ← Back to Reports
+        </a>
+    </div>
+</div>
+
+
+<!-- Report Information -->
+
+<div class="executive-report-meta">
+
+    <div>
+        <span>Reporting Period</span>
+        <strong>
+            {% if reporting_period.date_from or reporting_period.date_to %}
+                {{ reporting_period.date_from or "Beginning" }}
+                —
+                {{ reporting_period.date_to or "Present" }}
+            {% else %}
+                All Available Data
+            {% endif %}
+        </strong>
+    </div>
+
+    <div>
+        <span>Generated At</span>
+        <strong>
+            {{ generated_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}
+        </strong>
+    </div>
+
+    <div>
+        <span>Overall Status</span>
+        <strong
+            class="
+                executive-status
+                executive-status-{{ overall_status | lower }}
+            "
+        >
+            {{ overall_status }}
+        </strong>
+    </div>
+
+</div>
+
+
+<!-- Executive Summary -->
+
+<div class="section-header">
+    <div>
+        <h2>1. Executive Summary</h2>
+        <p>
+            Current infrastructure condition and
+            reporting-period operational performance.
+        </p>
+    </div>
+</div>
+
+<div class="executive-summary-grid">
+
+    <div class="card">
+        <div class="metric-label">Total Assets</div>
+        <div class="metric-value">
+            {{ executive_summary.total_assets }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Active Assets</div>
+        <div class="metric-value">
+            {{ executive_summary.active_assets }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Monitored Assets</div>
+        <div class="metric-value">
+            {{ executive_summary.total_monitored }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Current UP</div>
+        <div class="metric-value">
+            {{ executive_summary.monitoring_up }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Current DOWN</div>
+        <div class="metric-value">
+            {{ executive_summary.monitoring_down }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Current UNKNOWN</div>
+        <div class="metric-value">
+            {{ executive_summary.monitoring_unknown }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Availability</div>
+        <div class="metric-value">
+            {% if executive_summary.availability_percent is not none %}
+                {{ "%.2f" | format(
+                    executive_summary.availability_percent
+                ) }}%
+            {% else %}
+                —
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Audit Events</div>
+        <div class="metric-value">
+            {{ executive_summary.total_audit_events }}
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Asset Overview -->
+
+<div class="section-header">
+    <div>
+        <h2>2. Infrastructure Asset Overview</h2>
+        <p>
+            Current asset inventory distribution.
+        </p>
+    </div>
+</div>
+
+<div class="executive-distribution-grid">
+
+    <div class="card executive-distribution-card">
+        <h3>Asset Type</h3>
+
+        {% for item in asset_overview.distribution.asset_type %}
+            <div class="distribution-row">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.count }}</strong>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="card executive-distribution-card">
+        <h3>Environment</h3>
+
+        {% for item in asset_overview.distribution.environment %}
+            <div class="distribution-row">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.count }}</strong>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="card executive-distribution-card">
+        <h3>Operational Status</h3>
+
+        {% for item in asset_overview.distribution.status %}
+            <div class="distribution-row">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.count }}</strong>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="card executive-distribution-card">
+        <h3>Location</h3>
+
+        {% for item in asset_overview.distribution.location %}
+            <div class="distribution-row">
+                <span>{{ item.label }}</span>
+                <strong>{{ item.count }}</strong>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+
+<!-- Affected Assets -->
+
+<div class="section-header">
+    <div>
+        <h2>3. Assets Requiring Attention</h2>
+        <p>
+            Assets with current operational or
+            monitoring conditions requiring review.
+        </p>
+    </div>
+</div>
+
+{% set affected_count =
+    affected_assets.maintenance | length
+    + affected_assets.inactive | length
+    + affected_assets.monitoring_down | length
+    + affected_assets.monitoring_unknown | length
+%}
+
+{% if affected_count == 0 %}
+
+    <div class="executive-positive-state">
+        <strong>
+            No assets currently require operational attention.
+        </strong>
+
+        <span>
+            No inactive, maintenance, DOWN, or UNKNOWN
+            infrastructure conditions are currently detected.
+        </span>
+    </div>
+
+{% else %}
+
+    <div class="executive-affected-grid">
+
+        {% if affected_assets.monitoring_down %}
+            <div class="card">
+                <h3>Monitoring DOWN</h3>
+
+                {% for asset in affected_assets.monitoring_down %}
+                    <div class="affected-asset-row">
+                        <strong>{{ asset.hostname }}</strong>
+                        <span>
+                            {{ asset.asset_type }}
+                            ·
+                            {{ asset.environment }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if affected_assets.monitoring_unknown %}
+            <div class="card">
+                <h3>Monitoring UNKNOWN</h3>
+
+                {% for asset in affected_assets.monitoring_unknown %}
+                    <div class="affected-asset-row">
+                        <strong>{{ asset.hostname }}</strong>
+                        <span>
+                            {{ asset.asset_type }}
+                            ·
+                            {{ asset.environment }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if affected_assets.maintenance %}
+            <div class="card">
+                <h3>Under Maintenance</h3>
+
+                {% for asset in affected_assets.maintenance %}
+                    <div class="affected-asset-row">
+                        <strong>{{ asset.hostname }}</strong>
+                        <span>
+                            {{ asset.ip_address or "No IP" }}
+                            ·
+                            {{ asset.environment or "Unspecified" }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if affected_assets.inactive %}
+            <div class="card">
+                <h3>Inactive Assets</h3>
+
+                {% for asset in affected_assets.inactive %}
+                    <div class="affected-asset-row">
+                        <strong>{{ asset.hostname }}</strong>
+                        <span>
+                            {{ asset.ip_address or "No IP" }}
+                            ·
+                            {{ asset.environment or "Unspecified" }}
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    </div>
+
+{% endif %}
+
+
+<!-- Monitoring -->
+
+<div class="section-header">
+    <div>
+        <h2>4. Monitoring & Availability</h2>
+        <p>
+            Current health and historical monitoring
+            performance for the reporting period.
+        </p>
+    </div>
+</div>
+
+<div class="executive-summary-grid">
+
+    <div class="card">
+        <div class="metric-label">Total Checks</div>
+        <div class="metric-value">
+            {{ executive_summary.total_monitoring_checks }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Successful</div>
+        <div class="metric-value">
+            {{ executive_summary.successful_monitoring_checks }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Failed</div>
+        <div class="metric-value">
+            {{ executive_summary.failed_monitoring_checks }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Average Response</div>
+        <div class="metric-value">
+            {% if executive_summary.average_response_time_ms is not none %}
+                {{ "%.2f" | format(
+                    executive_summary.average_response_time_ms
+                ) }} ms
+            {% else %}
+                —
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Audit -->
+
+<div class="section-header">
+    <div>
+        <h2>5. Security & Audit Activity</h2>
+        <p>
+            Security and administrative activity recorded
+            during the reporting period.
+        </p>
+    </div>
+</div>
+
+<div class="executive-summary-grid">
+
+    <div class="card">
+        <div class="metric-label">Successful Events</div>
+        <div class="metric-value">
+            {{ executive_summary.successful_audit_events }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Failed Events</div>
+        <div class="metric-value">
+            {{ executive_summary.failed_audit_events }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Blocked Events</div>
+        <div class="metric-value">
+            {{ executive_summary.blocked_audit_events }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Authentication</div>
+        <div class="metric-value">
+            {{ audit_overview.categories.authentication }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Asset Changes</div>
+        <div class="metric-value">
+            {{ audit_overview.categories.assets }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">Monitoring Changes</div>
+        <div class="metric-value">
+            {{ audit_overview.categories.monitoring }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="metric-label">User Administration</div>
+        <div class="metric-value">
+            {{ audit_overview.categories.users }}
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Findings -->
+
+<div class="section-header">
+    <div>
+        <h2>6. Key Findings</h2>
+        <p>
+            Current and historical conditions requiring
+            management awareness.
+        </p>
+    </div>
+</div>
+
+<div class="executive-findings">
+
+    {% for finding in findings %}
+
+        <div class="executive-finding">
+
+            <div class="finding-meta">
+                <span
+                    class="
+                        finding-severity
+                        finding-{{ finding.severity | lower }}
+                    "
+                >
+                    {{ finding.severity }}
+                </span>
+
+                <span class="finding-category">
+                    {{ finding.category }}
+                </span>
+
+                <span class="finding-scope">
+                    {{ finding.scope }}
+                </span>
+            </div>
+
+            <div class="finding-description">
+                <strong>{{ finding.title }}</strong>
+
+                {% if finding.affected_assets %}
+                    <div class="finding-assets">
+
+                        {% for asset in finding.affected_assets %}
+                            <span>
+                                {{ asset.hostname }}
+                                {% if asset.ip_address %}
+                                    · {{ asset.ip_address }}
+                                {% endif %}
+                            </span>
+                        {% endfor %}
+
+                    </div>
+                {% endif %}
+            </div>
+
+            <span class="finding-value">
+                {{ finding.value }}
+            </span>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+
+<!-- Management Summary -->
+
+<div class="section-header">
+    <div>
+        <h2>7. Management Summary</h2>
+        <p>
+            High-level operational assessment based on
+            current and reporting-period information.
+        </p>
+    </div>
+</div>
+
+<div class="management-summary-card">
+
+    <div class="management-summary-status">
+        <span>Overall Infrastructure Status</span>
+
+        <strong
+            class="
+                executive-status
+                executive-status-{{ management_summary.status | lower }}
+            "
+        >
+            {{ management_summary.status }}
+        </strong>
+    </div>
+
+    <p>
+        {{ management_summary.statement }}
+    </p>
+
+    <h3>Management Attention</h3>
+
+    <ul>
+        {% for item in management_summary.attention_items %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+
+<!-- Appendix -->
+
+<div class="section-header">
+    <div>
+        <h2>Appendix A — Asset Inventory</h2>
+        <p>
+            Current infrastructure assets included in
+            this report.
+        </p>
+    </div>
+</div>
+
+<div class="table-card executive-inventory-table">
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Hostname</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>IP Address</th>
+                    <th>Vendor / Model</th>
+                    <th>Operating System</th>
+                    <th>Environment</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for asset in asset_overview.assets %}
+
+                    <tr>
+                        <td>
+                            <strong>
+                                {{ asset.hostname }}
+                            </strong>
+                        </td>
+
+                        <td>{{ asset.name }}</td>
+
+                        <td>{{ asset.asset_type }}</td>
+
+                        <td>
+                            {{ asset.ip_address or "—" }}
+                        </td>
+
+                        <td>
+                            {{ asset.vendor or "—" }}
+                            {% if asset.model %}
+                                / {{ asset.model }}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ asset.operating_system or "—" }}
+                        </td>
+
+                        <td>
+                            {{ asset.environment or "—" }}
+                        </td>
+
+                        <td>
+                            {{ asset.location or "—" }}
+                        </td>
+
+                        <td>
+                            {{ asset.status }}
+                        </td>
+                    </tr>
+
+                {% else %}
+
+                    <tr>
+                        <td colspan="9">
+                            No assets available.
+                        </td>
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+<div class="executive-report-footer">
+    <strong>
+        Infrastructure Operations Platform
+    </strong>
+
+    <span>
+        Report generated
+        {{ generated_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}
+    </span>
+</div>
+
+{% endblock %}
