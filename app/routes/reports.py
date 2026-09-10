@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -23,6 +23,10 @@ from app.services.executive_pdf_service import (
 from app.services.report_export_service import (
     report_export_service,
 )
+from app.services.report_date_service import (
+    ReportDateValidationError,
+    report_date_service,
+)
 from app.services.report_service import (
     report_service,
 )
@@ -40,6 +44,37 @@ router = APIRouter(
     prefix="/reports",
     tags=["Reports"],
 )
+
+
+def _bad_date_request(
+    exc: ReportDateValidationError,
+) -> HTTPException:
+    return HTTPException(
+        status_code=400,
+        detail=str(exc),
+    )
+
+
+def _date_error_response(
+    *,
+    request: Request,
+    current_user: UserModel,
+    page_title: str,
+    back_url: str,
+    error: str,
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="reports/date_error.html",
+        context={
+            "page_title": page_title,
+            "active_nav": "reports",
+            "current_user": current_user,
+            "back_url": back_url,
+            "date_error": error,
+        },
+        status_code=400,
+    )
 
 
 @router.get("")
@@ -77,12 +112,23 @@ def executive_report_pdf(
         )
     ),
 ):
+    try:
+        date_range = report_date_service.require_valid(
+            date_from,
+            date_to,
+        )
+    except ReportDateValidationError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
+
     data = (
         executive_report_service
         .get_executive_report(
             db,
-            date_from=date_from,
-            date_to=date_to,
+            date_from=date_range.date_from or None,
+            date_to=date_range.date_to or None,
         )
     )
 
@@ -121,12 +167,31 @@ def executive_report(
         )
     ),
 ):
+    date_range = report_date_service.parse(
+        date_from,
+        date_to,
+    )
+
+    if not date_range.is_valid:
+        return _date_error_response(
+            request=request,
+            current_user=current_user,
+            page_title=(
+                "Executive Infrastructure Report"
+            ),
+            back_url="/reports/executive",
+            error=(
+                date_range.error
+                or "Invalid reporting period."
+            ),
+        )
+
     data = (
         executive_report_service
         .get_executive_report(
             db,
-            date_from=date_from,
-            date_to=date_to,
+            date_from=date_range.date_from or None,
+            date_to=date_range.date_to or None,
         )
     )
 
@@ -152,17 +217,20 @@ def export_audit_activity_csv(
         )
     ),
 ):
-    content, filename = (
-        report_export_service.export_audit_activity_csv(
-            db,
-            actor=actor,
-            action=action,
-            resource_type=resource_type,
-            status=status,
-            date_from=date_from,
-            date_to=date_to,
+    try:
+        content, filename = (
+            report_export_service.export_audit_activity_csv(
+                db,
+                actor=actor,
+                action=action,
+                resource_type=resource_type,
+                status=status,
+                date_from=date_from,
+                date_to=date_to,
+            )
         )
-    )
+    except ReportDateValidationError as exc:
+        raise _bad_date_request(exc) from exc
 
     return Response(
         content=content,
@@ -195,14 +263,31 @@ def audit_activity_report(
         )
     ),
 ):
+    date_range = report_date_service.parse(
+        date_from,
+        date_to,
+    )
+
+    if not date_range.is_valid:
+        return _date_error_response(
+            request=request,
+            current_user=current_user,
+            page_title="Audit Activity Report",
+            back_url="/reports/audit",
+            error=(
+                date_range.error
+                or "Invalid reporting period."
+            ),
+        )
+
     data = report_service.get_audit_activity_report(
         db,
         actor=actor,
         action=action,
         resource_type=resource_type,
         status=status,
-        date_from=date_from,
-        date_to=date_to,
+        date_from=date_range.date_from or None,
+        date_to=date_range.date_to or None,
     )
 
     return templates.TemplateResponse(
@@ -231,16 +316,19 @@ def export_monitoring_csv(
         )
     ),
 ):
-    content, filename = (
-        report_export_service.export_monitoring_csv(
-            db,
-            q=q,
-            status=status,
-            check_type=check_type,
-            date_from=date_from,
-            date_to=date_to,
+    try:
+        content, filename = (
+            report_export_service.export_monitoring_csv(
+                db,
+                q=q,
+                status=status,
+                check_type=check_type,
+                date_from=date_from,
+                date_to=date_to,
+            )
         )
-    )
+    except ReportDateValidationError as exc:
+        raise _bad_date_request(exc) from exc
 
     return Response(
         content=content,
@@ -272,13 +360,30 @@ def monitoring_report(
         )
     ),
 ):
+    date_range = report_date_service.parse(
+        date_from,
+        date_to,
+    )
+
+    if not date_range.is_valid:
+        return _date_error_response(
+            request=request,
+            current_user=current_user,
+            page_title="Monitoring Report",
+            back_url="/reports/monitoring",
+            error=(
+                date_range.error
+                or "Invalid reporting period."
+            ),
+        )
+
     data = report_service.get_monitoring_report(
         db,
         q=q,
         status=status,
         check_type=check_type,
-        date_from=date_from,
-        date_to=date_to,
+        date_from=date_range.date_from or None,
+        date_to=date_range.date_to or None,
     )
 
     return templates.TemplateResponse(

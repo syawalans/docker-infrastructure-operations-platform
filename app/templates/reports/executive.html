@@ -31,6 +31,75 @@
 </div>
 
 
+<div class="report-filter-card">
+
+    <form
+        method="get"
+        action="/reports/executive"
+        class="report-filter-form"
+    >
+
+        <div class="report-filter-field">
+
+            <label for="executive-date-from">
+                Date From
+            </label>
+
+            <input
+                id="executive-date-from"
+                type="date"
+                name="date_from"
+                value="{{ reporting_period.date_from or '' }}"
+            >
+
+        </div>
+
+
+        <div class="report-filter-field">
+
+            <label for="executive-date-to">
+                Date To
+            </label>
+
+            <input
+                id="executive-date-to"
+                type="date"
+                name="date_to"
+                value="{{ reporting_period.date_to or '' }}"
+            >
+
+        </div>
+
+
+        <div class="report-filter-actions">
+
+            <button
+                type="submit"
+                class="btn-primary"
+            >
+                Apply Period
+            </button>
+
+            <a
+                href="/reports/executive"
+                class="btn-secondary"
+            >
+                Reset
+            </a>
+
+        </div>
+
+    </form>
+
+    <div class="report-filter-note">
+        The selected reporting period applies to
+        historical monitoring performance and audit
+        activity included in this executive report.
+    </div>
+
+</div>
+
+
 <!-- Report Information -->
 
 <div class="executive-report-meta">

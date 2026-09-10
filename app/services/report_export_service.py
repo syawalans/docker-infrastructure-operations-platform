@@ -8,6 +8,7 @@ from app.repositories.report_repository import (
     report_repository,
 )
 from app.services.report_service import report_service
+from app.services.report_date_service import report_date_service
 
 
 CSV_FORMULA_PREFIXES = (
@@ -157,32 +158,17 @@ class ReportExportService:
 
         filters = data["filters"]
 
-        parsed_date_from = None
-        parsed_date_to = None
+        date_range = report_date_service.require_valid(
+            filters["date_from"],
+            filters["date_to"],
+        )
 
-        if filters["date_from"]:
-            parsed_date_from = datetime.strptime(
-                filters["date_from"],
-                "%Y-%m-%d",
-            ).replace(
-                hour=0,
-                minute=0,
-                second=0,
-                microsecond=0,
-                tzinfo=timezone.utc,
-            )
-
-        if filters["date_to"]:
-            parsed_date_to = datetime.strptime(
-                filters["date_to"],
-                "%Y-%m-%d",
-            ).replace(
-                hour=23,
-                minute=59,
-                second=59,
-                microsecond=999999,
-                tzinfo=timezone.utc,
-            )
+        parsed_date_from = (
+            date_range.parsed_date_from
+        )
+        parsed_date_to = (
+            date_range.parsed_date_to
+        )
 
         rows = (
             report_repository
@@ -297,32 +283,17 @@ class ReportExportService:
 
         filters = data["filters"]
 
-        parsed_date_from = None
-        parsed_date_to = None
+        date_range = report_date_service.require_valid(
+            filters["date_from"],
+            filters["date_to"],
+        )
 
-        if filters["date_from"]:
-            parsed_date_from = datetime.strptime(
-                filters["date_from"],
-                "%Y-%m-%d",
-            ).replace(
-                hour=0,
-                minute=0,
-                second=0,
-                microsecond=0,
-                tzinfo=timezone.utc,
-            )
-
-        if filters["date_to"]:
-            parsed_date_to = datetime.strptime(
-                filters["date_to"],
-                "%Y-%m-%d",
-            ).replace(
-                hour=23,
-                minute=59,
-                second=59,
-                microsecond=999999,
-                tzinfo=timezone.utc,
-            )
+        parsed_date_from = (
+            date_range.parsed_date_from
+        )
+        parsed_date_to = (
+            date_range.parsed_date_to
+        )
 
         rows = (
             report_repository

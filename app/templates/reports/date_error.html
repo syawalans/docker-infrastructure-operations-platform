@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% set active_nav = "reports" %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1>{{ page_title }}</h1>
+        <p>
+            The requested reporting period could not be processed.
+        </p>
+    </div>
+
+    <div class="page-header-actions">
+        <a
+            href="{{ back_url }}"
+            class="btn-secondary"
+        >
+            ← Back to Report
+        </a>
+
+        <a
+            href="/reports"
+            class="btn-secondary"
+        >
+            Reports Overview
+        </a>
+    </div>
+</div>
+
+
+<div class="report-validation-card">
+
+    <div class="report-validation-icon">
+        !
+    </div>
+
+    <div class="report-validation-content">
+
+        <h2>Invalid Reporting Period</h2>
+
+        <p class="report-validation-message">
+            {{ date_error }}
+        </p>
+
+        <p class="report-validation-help">
+            Please verify the reporting dates and try again.
+            The start date must not be later than the end date.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

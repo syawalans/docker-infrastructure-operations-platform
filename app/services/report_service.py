@@ -1,6 +1,7 @@
-from datetime import datetime, time, timezone
 
 from sqlalchemy.orm import Session
+
+from app.services.report_date_service import report_date_service
 
 from app.repositories.report_repository import (
     report_repository,
@@ -83,34 +84,26 @@ class ReportService:
             "date_to": date_to or "",
         }
 
-        parsed_date_from = None
-        parsed_date_to = None
+        date_range = report_date_service.parse(
+            filters["date_from"],
+            filters["date_to"],
+        )
 
-        if filters["date_from"]:
-            try:
-                parsed_date_from = datetime.combine(
-                    datetime.strptime(
-                        filters["date_from"],
-                        "%Y-%m-%d",
-                    ).date(),
-                    time.min,
-                    tzinfo=timezone.utc,
-                )
-            except ValueError:
-                filters["date_from"] = ""
+        filters["date_from"] = date_range.date_from
+        filters["date_to"] = date_range.date_to
 
-        if filters["date_to"]:
-            try:
-                parsed_date_to = datetime.combine(
-                    datetime.strptime(
-                        filters["date_to"],
-                        "%Y-%m-%d",
-                    ).date(),
-                    time.max,
-                    tzinfo=timezone.utc,
-                )
-            except ValueError:
-                filters["date_to"] = ""
+        parsed_date_from = (
+            date_range.parsed_date_from
+            if date_range.is_valid
+            else None
+        )
+        parsed_date_to = (
+            date_range.parsed_date_to
+            if date_range.is_valid
+            else None
+        )
+
+        filters["date_error"] = date_range.error
 
         rows = (
             report_repository.get_monitoring_report(
@@ -285,34 +278,26 @@ class ReportService:
             "date_to": date_to or "",
         }
 
-        parsed_date_from = None
-        parsed_date_to = None
+        date_range = report_date_service.parse(
+            filters["date_from"],
+            filters["date_to"],
+        )
 
-        if filters["date_from"]:
-            try:
-                parsed_date_from = datetime.combine(
-                    datetime.strptime(
-                        filters["date_from"],
-                        "%Y-%m-%d",
-                    ).date(),
-                    time.min,
-                    tzinfo=timezone.utc,
-                )
-            except ValueError:
-                filters["date_from"] = ""
+        filters["date_from"] = date_range.date_from
+        filters["date_to"] = date_range.date_to
 
-        if filters["date_to"]:
-            try:
-                parsed_date_to = datetime.combine(
-                    datetime.strptime(
-                        filters["date_to"],
-                        "%Y-%m-%d",
-                    ).date(),
-                    time.max,
-                    tzinfo=timezone.utc,
-                )
-            except ValueError:
-                filters["date_to"] = ""
+        parsed_date_from = (
+            date_range.parsed_date_from
+            if date_range.is_valid
+            else None
+        )
+        parsed_date_to = (
+            date_range.parsed_date_to
+            if date_range.is_valid
+            else None
+        )
+
+        filters["date_error"] = date_range.error
 
         query_filters = {
             "actor": filters["actor"] or None,
