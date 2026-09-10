@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.settings_registry import (
     DEFAULT_SYSTEM_SETTINGS,
+    SYSTEM_TIMEZONES,
 )
 from app.models.setting import SystemSettingModel
 from app.repositories.settings_repository import (
@@ -226,6 +227,59 @@ class SettingsService:
             is_editable=is_editable,
             updated_by=updated_by,
         )
+
+    def validate_general_settings(
+        self,
+        *,
+        platform_display_name: str,
+        organization_name: str,
+        timezone: str,
+    ) -> dict[str, str]:
+        platform_display_name = (
+            platform_display_name.strip()
+        )
+        organization_name = organization_name.strip()
+        timezone = timezone.strip()
+
+        if not platform_display_name:
+            raise ValueError(
+                "Platform Display Name is required."
+            )
+
+        if len(platform_display_name) > 100:
+            raise ValueError(
+                "Platform Display Name must not exceed "
+                "100 characters."
+            )
+
+        if len(organization_name) > 150:
+            raise ValueError(
+                "Organization Name must not exceed "
+                "150 characters."
+            )
+
+        if not timezone:
+            raise ValueError(
+                "Timezone is required."
+            )
+
+        allowed_timezones = {
+            value
+            for value, _label in SYSTEM_TIMEZONES
+        }
+
+        if timezone not in allowed_timezones:
+            raise ValueError(
+                "Selected timezone is not supported."
+            )
+
+        return {
+            "platform_display_name": (
+                platform_display_name
+            ),
+            "organization_name": organization_name,
+            "timezone": timezone,
+        }
 
     def update_setting(
         self,

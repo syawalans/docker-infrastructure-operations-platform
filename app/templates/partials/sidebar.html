@@ -75,7 +75,15 @@
     </a>
     {% endif %}
 
-    <a href="#" class="nav-item">
+    {% if has_permission(
+        request.state.current_user,
+        PERMISSION_SETTINGS_VIEW
+    ) %}
+    <a
+        href="/settings"
+        class="nav-item {% if active_nav == 'settings' %}active{% endif %}"
+    >
         Settings
     </a>
+    {% endif %}
 </aside>

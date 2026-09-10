@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% set active_nav = "settings" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Settings</h1>
+        <p>
+            Manage application preferences and operational
+            defaults.
+        </p>
+    </div>
+</div>
+
+{% if error %}
+<div class="monitoring-error">
+    {{ error }}
+</div>
+{% endif %}
+
+{% if success %}
+<div class="user-form-note">
+    {{ success }}
+</div>
+{% endif %}
+
+<div class="form-card">
+    <div class="section-header">
+        <div>
+            <h2>General Settings</h2>
+            <p>
+                Configure the platform identity and default
+                display timezone.
+            </p>
+        </div>
+    </div>
+
+    <form
+        method="post"
+        action="/settings/general"
+    >
+        {% include "partials/csrf_field.html" %}
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="platform_display_name">
+                    Platform Display Name
+                </label>
+
+                <input
+                    type="text"
+                    id="platform_display_name"
+                    name="platform_display_name"
+                    maxlength="100"
+                    value="{{ general.get(
+                        'platform_display_name',
+                        ''
+                    ) }}"
+                    required
+                >
+
+                <div class="form-help">
+                    Name displayed throughout the application
+                    interface.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="organization_name">
+                    Organization Name
+                </label>
+
+                <input
+                    type="text"
+                    id="organization_name"
+                    name="organization_name"
+                    maxlength="150"
+                    value="{{ general.get(
+                        'organization_name',
+                        ''
+                    ) }}"
+                >
+
+                <div class="form-help">
+                    Optional organization or company name.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="timezone">
+                    Timezone
+                </label>
+
+                <select
+                    id="timezone"
+                    name="timezone"
+                    required
+                >
+                    {% for value, label in timezones %}
+                    <option
+                        value="{{ value }}"
+                        {% if general.get(
+                            'timezone',
+                            'UTC'
+                        ) == value %}selected{% endif %}
+                    >
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <div class="form-help">
+                    Timezone used for platform display
+                    preferences.
+                </div>
+            </div>
+        </div>
+
+        {% if has_permission(
+            request.state.current_user,
+            PERMISSION_SETTINGS_EDIT
+        ) %}
+        <div class="form-actions">
+            <button
+                type="submit"
+                class="btn"
+            >
+                Save General Settings
+            </button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

@@ -7,6 +7,7 @@ from app.core.constants import (
     PERMISSION_ASSET_EDIT,
     PERMISSION_MONITORING_CONFIGURE,
     PERMISSION_MONITORING_RUN_CHECK,
+    PERMISSION_SETTINGS_EDIT,
     PERMISSION_SETTINGS_VIEW,
     PERMISSION_USER_MANAGE,
 )
@@ -41,6 +42,9 @@ def configure_template_permissions(
             ),
             "PERMISSION_SETTINGS_VIEW": (
                 PERMISSION_SETTINGS_VIEW
+            ),
+            "PERMISSION_SETTINGS_EDIT": (
+                PERMISSION_SETTINGS_EDIT
             ),
             "PERMISSION_USER_MANAGE": (
                 PERMISSION_USER_MANAGE

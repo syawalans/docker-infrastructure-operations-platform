@@ -1,3 +1,14 @@
+SYSTEM_TIMEZONES = (
+    ("UTC", "UTC"),
+    ("Asia/Jakarta", "Asia/Jakarta (WIB)"),
+    ("Asia/Makassar", "Asia/Makassar (WITA)"),
+    ("Asia/Jayapura", "Asia/Jayapura (WIT)"),
+    ("Asia/Singapore", "Asia/Singapore"),
+    ("Asia/Kuala_Lumpur", "Asia/Kuala Lumpur"),
+    ("Asia/Tokyo", "Asia/Tokyo"),
+)
+
+
 DEFAULT_SYSTEM_SETTINGS = (
     {
         "category": "general",
