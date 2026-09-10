@@ -242,4 +242,103 @@
     </form>
 </div>
 
+<div class="form-card">
+    <div class="section-header">
+        <div>
+            <h2>Reporting Preferences</h2>
+            <p>
+                Configure the default reporting period used
+                when opening historical reports.
+            </p>
+        </div>
+    </div>
+
+    <form
+        method="post"
+        action="/settings/reporting"
+    >
+        {% include "partials/csrf_field.html" %}
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="default_reporting_period_days">
+                    Default Reporting Period
+                </label>
+
+                <select
+                    id="default_reporting_period_days"
+                    name="default_reporting_period_days"
+                    required
+                >
+                    {% set selected_period = reporting.get(
+                        'default_reporting_period_days',
+                        30
+                    ) | int %}
+
+                    <option
+                        value="7"
+                        {% if selected_period == 7 %}selected{% endif %}
+                    >
+                        Last 7 Days
+                    </option>
+
+                    <option
+                        value="30"
+                        {% if selected_period == 30 %}selected{% endif %}
+                    >
+                        Last 30 Days
+                    </option>
+
+                    <option
+                        value="90"
+                        {% if selected_period == 90 %}selected{% endif %}
+                    >
+                        Last 90 Days
+                    </option>
+
+                    <option
+                        value="180"
+                        {% if selected_period == 180 %}selected{% endif %}
+                    >
+                        Last 180 Days
+                    </option>
+
+                    <option
+                        value="365"
+                        {% if selected_period == 365 %}selected{% endif %}
+                    >
+                        Last 365 Days
+                    </option>
+
+                    <option
+                        value="0"
+                        {% if selected_period == 0 %}selected{% endif %}
+                    >
+                        All Available Data
+                    </option>
+                </select>
+
+                <div class="form-help">
+                    Applied when a historical report is opened
+                    without an explicit reporting period.
+                </div>
+            </div>
+        </div>
+
+        {% if has_permission(
+            request.state.current_user,
+            PERMISSION_SETTINGS_EDIT
+        ) %}
+        <div class="form-actions">
+            <button
+                type="submit"
+                class="btn"
+            >
+                Save Reporting Preferences
+            </button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
 {% endblock %}

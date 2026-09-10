@@ -64,6 +64,11 @@ def render_settings(
         "monitoring",
     )
 
+    reporting = settings_service.get_category_values(
+        db,
+        "reporting",
+    )
+
     if form_data:
         form_category = form_data.get(
             "_category"
@@ -87,6 +92,12 @@ def render_settings(
                 **values,
             }
 
+        if form_category == "reporting":
+            reporting = {
+                **reporting,
+                **values,
+            }
+
     return templates.TemplateResponse(
         request=request,
         name="settings/index.html",
@@ -96,6 +107,7 @@ def render_settings(
             ),
             "general": general,
             "monitoring": monitoring,
+            "reporting": reporting,
             "check_types": MONITORING_CHECK_TYPES,
             "timezones": SYSTEM_TIMEZONES,
             "error": error,
@@ -129,6 +141,11 @@ def settings_page(
     if saved == "monitoring":
         success = (
             "Monitoring defaults saved successfully."
+        )
+
+    if saved == "reporting":
+        success = (
+            "Reporting preferences saved successfully."
         )
 
     return render_settings(
@@ -381,5 +398,120 @@ def monitoring_defaults_save(
 
     return RedirectResponse(
         url="/settings?saved=monitoring",
+        status_code=303,
+    )
+
+
+@router.post(
+    "/reporting",
+    response_class=HTMLResponse,
+)
+def reporting_preferences_save(
+    request: Request,
+    default_reporting_period_days: int = Form(...),
+    current_user: UserModel = Depends(
+        require_permission(
+            PERMISSION_SETTINGS_EDIT
+        )
+    ),
+    db: Session = Depends(get_db),
+):
+    form_data = {
+        "_category": "reporting",
+        "default_reporting_period_days": (
+            default_reporting_period_days
+        ),
+    }
+
+    try:
+        values = (
+            settings_service.validate_reporting_settings(
+                default_reporting_period_days=(
+                    default_reporting_period_days
+                ),
+            )
+        )
+
+    except ValueError as exc:
+        return render_settings(
+            request,
+            current_user=current_user,
+            db=db,
+            error=str(exc),
+            form_data=form_data,
+            status_code=400,
+        )
+
+    changes = []
+
+    for setting_key, new_value in values.items():
+        setting = settings_service.get_setting(
+            db,
+            "reporting",
+            setting_key,
+        )
+
+        if setting is None:
+            return render_settings(
+                request,
+                current_user=current_user,
+                db=db,
+                error=(
+                    f"Required setting "
+                    f"'reporting.{setting_key}' "
+                    f"was not found."
+                ),
+                form_data=form_data,
+                status_code=500,
+            )
+
+        old_value = (
+            settings_service.deserialize_value(
+                setting
+            )
+        )
+
+        if old_value == new_value:
+            continue
+
+        updated = settings_service.update_setting(
+            db,
+            category="reporting",
+            setting_key=setting_key,
+            setting_value=new_value,
+            updated_by=current_user.id,
+        )
+
+        changes.append(
+            {
+                "setting": updated,
+                "old_value": old_value,
+                "new_value": new_value,
+            }
+        )
+
+    for change in changes:
+        updated = change["setting"]
+
+        audit_service.log(
+            db,
+            action="SYSTEM_SETTING_UPDATED",
+            resource_type="SYSTEM_SETTING",
+            resource_id=(
+                f"{updated.category}."
+                f"{updated.setting_key}"
+            ),
+            status="SUCCESS",
+            actor=current_user,
+            request=request,
+            details={
+                "setting_key": updated.setting_key,
+                "old_value": change["old_value"],
+                "new_value": change["new_value"],
+            },
+        )
+
+    return RedirectResponse(
+        url="/settings?saved=reporting",
         status_code=303,
     )

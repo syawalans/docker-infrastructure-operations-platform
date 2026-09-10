@@ -20,7 +20,7 @@
     <div class="page-header-actions">
 
         <a
-            href="/reports/monitoring/export.csv?q={{ filters.q | urlencode }}&status={{ filters.status | urlencode }}&check_type={{ filters.check_type | urlencode }}&date_from={{ filters.date_from | urlencode }}&date_to={{ filters.date_to | urlencode }}"
+            href="/reports/monitoring/export.csv?q={{ filters.q | urlencode }}&status={{ filters.status | urlencode }}&check_type={{ filters.check_type | urlencode }}&date_from={{ filters.date_from | urlencode }}&date_to={{ filters.date_to | urlencode }}{% if reporting_period_mode == 'all' %}&period=all{% endif %}"
             class="btn-primary"
         >
             Export CSV
@@ -214,6 +214,13 @@
                 class="btn-secondary"
             >
                 Reset
+            </a>
+
+            <a
+                href="/reports/monitoring?period=all"
+                class="btn-secondary"
+            >
+                All Data
             </a>
 
         </div>

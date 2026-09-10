@@ -30,6 +30,9 @@ from app.services.report_date_service import (
 from app.services.report_service import (
     report_service,
 )
+from app.services.settings_service import (
+    settings_service,
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +47,36 @@ router = APIRouter(
     prefix="/reports",
     tags=["Reports"],
 )
+
+
+def _resolve_reporting_period(
+    db: Session,
+    *,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    period: str | None = None,
+):
+    default_period_days = settings_service.get_value(
+        db,
+        "reporting",
+        "default_reporting_period_days",
+        default=30,
+    )
+
+    timezone_name = settings_service.get_value(
+        db,
+        "general",
+        "timezone",
+        default="UTC",
+    )
+
+    return report_date_service.resolve_period(
+        date_from=date_from,
+        date_to=date_to,
+        period_mode=period,
+        default_period_days=default_period_days,
+        timezone_name=timezone_name,
+    )
 
 
 def _bad_date_request(
@@ -105,6 +138,7 @@ def reports_overview(
 def executive_report_pdf(
     date_from: str | None = None,
     date_to: str | None = None,
+    period: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(
         require_permission(
@@ -112,10 +146,17 @@ def executive_report_pdf(
         )
     ),
 ):
+    resolved_period = _resolve_reporting_period(
+        db,
+        date_from=date_from,
+        date_to=date_to,
+        period=period,
+    )
+
     try:
         date_range = report_date_service.require_valid(
-            date_from,
-            date_to,
+            resolved_period.date_from,
+            resolved_period.date_to,
         )
     except ReportDateValidationError as exc:
         raise HTTPException(
@@ -160,6 +201,7 @@ def executive_report(
     request: Request,
     date_from: str | None = None,
     date_to: str | None = None,
+    period: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(
         require_permission(
@@ -167,9 +209,16 @@ def executive_report(
         )
     ),
 ):
+    resolved_period = _resolve_reporting_period(
+        db,
+        date_from=date_from,
+        date_to=date_to,
+        period=period,
+    )
+
     date_range = report_date_service.parse(
-        date_from,
-        date_to,
+        resolved_period.date_from,
+        resolved_period.date_to,
     )
 
     if not date_range.is_valid:
@@ -195,6 +244,10 @@ def executive_report(
         )
     )
 
+    data["reporting_period"]["mode"] = (
+        resolved_period.mode
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="reports/executive.html",
@@ -210,6 +263,7 @@ def export_audit_activity_csv(
     status: str | None = None,
     date_from: str | None = None,
     date_to: str | None = None,
+    period: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(
         require_permission(
@@ -217,6 +271,13 @@ def export_audit_activity_csv(
         )
     ),
 ):
+    resolved_period = _resolve_reporting_period(
+        db,
+        date_from=date_from,
+        date_to=date_to,
+        period=period,
+    )
+
     try:
         content, filename = (
             report_export_service.export_audit_activity_csv(
@@ -225,8 +286,12 @@ def export_audit_activity_csv(
                 action=action,
                 resource_type=resource_type,
                 status=status,
-                date_from=date_from,
-                date_to=date_to,
+                date_from=(
+                    resolved_period.date_from or None
+                ),
+                date_to=(
+                    resolved_period.date_to or None
+                ),
             )
         )
     except ReportDateValidationError as exc:
@@ -256,6 +321,7 @@ def audit_activity_report(
     status: str | None = None,
     date_from: str | None = None,
     date_to: str | None = None,
+    period: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(
         require_permission(
@@ -263,9 +329,16 @@ def audit_activity_report(
         )
     ),
 ):
+    resolved_period = _resolve_reporting_period(
+        db,
+        date_from=date_from,
+        date_to=date_to,
+        period=period,
+    )
+
     date_range = report_date_service.parse(
-        date_from,
-        date_to,
+        resolved_period.date_from,
+        resolved_period.date_to,
     )
 
     if not date_range.is_valid:
@@ -297,6 +370,9 @@ def audit_activity_report(
             "page_title": "Audit Activity Report",
             "active_nav": "reports",
             "current_user": current_user,
+            "reporting_period_mode": (
+                resolved_period.mode
+            ),
             **data,
         },
     )
@@ -309,6 +385,7 @@ def export_monitoring_csv(
     check_type: str | None = None,
     date_from: str | None = None,
     date_to: str | None = None,
+    period: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(
         require_permission(
@@ -316,6 +393,13 @@ def export_monitoring_csv(
         )
     ),
 ):
+    resolved_period = _resolve_reporting_period(
+        db,
+        date_from=date_from,
+        date_to=date_to,
+        period=period,
+    )
+
     try:
         content, filename = (
             report_export_service.export_monitoring_csv(
@@ -323,8 +407,12 @@ def export_monitoring_csv(
                 q=q,
                 status=status,
                 check_type=check_type,
-                date_from=date_from,
-                date_to=date_to,
+                date_from=(
+                    resolved_period.date_from or None
+                ),
+                date_to=(
+                    resolved_period.date_to or None
+                ),
             )
         )
     except ReportDateValidationError as exc:
@@ -353,6 +441,7 @@ def monitoring_report(
     check_type: str | None = None,
     date_from: str | None = None,
     date_to: str | None = None,
+    period: str | None = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(
         require_permission(
@@ -360,9 +449,16 @@ def monitoring_report(
         )
     ),
 ):
+    resolved_period = _resolve_reporting_period(
+        db,
+        date_from=date_from,
+        date_to=date_to,
+        period=period,
+    )
+
     date_range = report_date_service.parse(
-        date_from,
-        date_to,
+        resolved_period.date_from,
+        resolved_period.date_to,
     )
 
     if not date_range.is_valid:
@@ -393,6 +489,9 @@ def monitoring_report(
             "page_title": "Monitoring Report",
             "active_nav": "reports",
             "current_user": current_user,
+            "reporting_period_mode": (
+                resolved_period.mode
+            ),
             **data,
         },
     )

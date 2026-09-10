@@ -342,6 +342,42 @@ class SettingsService:
             ),
         }
 
+    def validate_reporting_settings(
+        self,
+        *,
+        default_reporting_period_days: int | str,
+    ) -> dict[str, int]:
+        try:
+            period_days = int(
+                default_reporting_period_days
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "Default reporting period is invalid."
+            ) from exc
+
+        allowed_periods = {
+            0,
+            7,
+            30,
+            90,
+            180,
+            365,
+        }
+
+        if period_days not in allowed_periods:
+            raise ValueError(
+                "Default reporting period must be "
+                "7, 30, 90, 180, or 365 days, "
+                "or All Available Data."
+            )
+
+        return {
+            "default_reporting_period_days": (
+                period_days
+            ),
+        }
+
     def update_setting(
         self,
         db: Session,

@@ -15,7 +15,7 @@
 
     <div class="page-header-actions">
         <a
-            href="/reports/executive.pdf?date_from={{ reporting_period.date_from or '' | urlencode }}&date_to={{ reporting_period.date_to or '' | urlencode }}"
+            href="/reports/executive.pdf?date_from={{ reporting_period.date_from or '' | urlencode }}&date_to={{ reporting_period.date_to or '' | urlencode }}{% if reporting_period.mode == 'all' %}&period=all{% endif %}"
             class="btn-primary"
         >
             Download PDF
@@ -85,6 +85,13 @@
                 class="btn-secondary"
             >
                 Reset
+            </a>
+
+            <a
+                href="/reports/executive?period=all"
+                class="btn-secondary"
+            >
+                All Data
             </a>
 
         </div>

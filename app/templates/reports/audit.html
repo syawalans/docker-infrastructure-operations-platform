@@ -18,7 +18,7 @@
     <div class="page-header-actions">
 
         <a
-            href="/reports/audit/export.csv?actor={{ filters.actor | urlencode }}&action={{ filters.action | urlencode }}&resource_type={{ filters.resource_type | urlencode }}&status={{ filters.status | urlencode }}&date_from={{ filters.date_from | urlencode }}&date_to={{ filters.date_to | urlencode }}"
+            href="/reports/audit/export.csv?actor={{ filters.actor | urlencode }}&action={{ filters.action | urlencode }}&resource_type={{ filters.resource_type | urlencode }}&status={{ filters.status | urlencode }}&date_from={{ filters.date_from | urlencode }}&date_to={{ filters.date_to | urlencode }}{% if reporting_period_mode == 'all' %}&period=all{% endif %}"
             class="btn-primary"
         >
             Export CSV
@@ -242,6 +242,13 @@
                 class="btn-secondary"
             >
                 Reset
+            </a>
+
+            <a
+                href="/reports/audit?period=all"
+                class="btn-secondary"
+            >
+                All Data
             </a>
 
         </div>

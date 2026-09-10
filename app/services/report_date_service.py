@@ -1,5 +1,14 @@
 from dataclasses import dataclass
-from datetime import datetime, time, timezone
+from datetime import (
+    datetime,
+    time,
+    timedelta,
+    timezone,
+)
+from zoneinfo import (
+    ZoneInfo,
+    ZoneInfoNotFoundError,
+)
 
 
 class ReportDateValidationError(ValueError):
@@ -17,6 +26,14 @@ class ReportDateRange:
     @property
     def is_valid(self) -> bool:
         return self.error is None
+
+
+@dataclass(frozen=True)
+class ResolvedReportPeriod:
+    date_from: str
+    date_to: str
+    mode: str
+    period_days: int
 
 
 class ReportDateService:
@@ -82,6 +99,92 @@ class ReportDateService:
             date_to=normalized_to,
             parsed_date_from=parsed_from,
             parsed_date_to=parsed_to,
+        )
+
+    def resolve_period(
+        self,
+        *,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        period_mode: str | None = None,
+        default_period_days: int = 30,
+        timezone_name: str = "UTC",
+        now: datetime | None = None,
+    ) -> ResolvedReportPeriod:
+        normalized_from = (date_from or "").strip()
+        normalized_to = (date_to or "").strip()
+        normalized_mode = (period_mode or "").strip().lower()
+
+        if normalized_from or normalized_to:
+            return ResolvedReportPeriod(
+                date_from=normalized_from,
+                date_to=normalized_to,
+                mode="explicit",
+                period_days=0,
+            )
+
+        if normalized_mode == "all":
+            return ResolvedReportPeriod(
+                date_from="",
+                date_to="",
+                mode="all",
+                period_days=0,
+            )
+
+        try:
+            period_days = int(default_period_days)
+        except (TypeError, ValueError):
+            period_days = 30
+
+        if period_days <= 0:
+            return ResolvedReportPeriod(
+                date_from="",
+                date_to="",
+                mode="all",
+                period_days=0,
+            )
+
+        try:
+            local_timezone = ZoneInfo(
+                timezone_name
+            )
+        except (
+            ZoneInfoNotFoundError,
+            ValueError,
+            TypeError,
+        ):
+            local_timezone = timezone.utc
+
+        if now is None:
+            local_now = datetime.now(
+                local_timezone
+            )
+        elif now.tzinfo is None:
+            local_now = now.replace(
+                tzinfo=local_timezone
+            )
+        else:
+            local_now = now.astimezone(
+                local_timezone
+            )
+
+        date_to_value = local_now.date()
+        date_from_value = (
+            date_to_value
+            - timedelta(
+                days=period_days - 1
+            )
+        )
+
+        return ResolvedReportPeriod(
+            date_from=date_from_value.strftime(
+                self.DATE_FORMAT
+            ),
+            date_to=date_to_value.strftime(
+                self.DATE_FORMAT
+            ),
+            mode="default",
+            period_days=period_days,
         )
 
     def require_valid(
