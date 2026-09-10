@@ -17,9 +17,10 @@ This documentation describes the implementation currently present in the reposit
 | [Reporting](09-reporting.md) | Report views, exports, periods, and source data. |
 | [Settings](10-settings.md) | Database preferences and environment/deployment configuration boundaries. |
 | [Source Installation](11-source-installation.md) | Source-build deployment using `compose.yaml`. |
+| [Pre-built Image Installation](12-prebuilt-image-installation.md) | Docker Hub image deployment using `compose.production.yaml`. |
 
 ## Status
 
-The eleven documents above are complete. The following are planned and are not yet documentation deliverables: pre-built-image installation, configuration, backup and restore, operations, failure testing, troubleshooting, and development.
+The twelve documents above are complete. The following are planned and are not yet documentation deliverables: configuration, backup and restore, operations, failure testing, troubleshooting, and development.
 
 Existing legacy files in this directory are outside this documentation phase and have not been revised.
