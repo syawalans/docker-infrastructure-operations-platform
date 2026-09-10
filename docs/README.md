@@ -13,9 +13,13 @@ This documentation describes the implementation currently present in the reposit
 | [Database](05-database.md) | PostgreSQL persistence, entities, initialization, and data boundaries. |
 | [Authentication and RBAC](06-authentication-rbac.md) | Identity, sessions, passwords, roles, and permissions. |
 | [Security](07-security.md) | Implemented application and container controls and their boundaries. |
+| [Monitoring](08-monitoring.md) | Check configuration, worker execution, results, and limits. |
+| [Reporting](09-reporting.md) | Report views, exports, periods, and source data. |
+| [Settings](10-settings.md) | Database preferences and environment/deployment configuration boundaries. |
+| [Source Installation](11-source-installation.md) | Source-build deployment using `compose.yaml`. |
 
 ## Status
 
-The seven documents above are complete. The following are planned and are not yet documentation deliverables: monitoring, reporting, settings, source installation, pre-built-image installation, configuration, backup and restore, operations, failure testing, troubleshooting, and development.
+The eleven documents above are complete. The following are planned and are not yet documentation deliverables: pre-built-image installation, configuration, backup and restore, operations, failure testing, troubleshooting, and development.
 
 Existing legacy files in this directory are outside this documentation phase and have not been revised.
