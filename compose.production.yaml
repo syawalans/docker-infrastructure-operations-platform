@@ -9,9 +9,6 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
-    ports:
-      - "127.0.0.1:5432:5432"
-
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -26,11 +23,7 @@ services:
       retries: 5
 
   web:
-    build:
-      context: .
-      dockerfile: app/Dockerfile
-
-    image: infrastructure-ops-app:dev
+    image: ${DOCKER_IMAGE}:${IMAGE_TAG:-latest}
     container_name: infrastructure-ops-web
     restart: unless-stopped
 
@@ -47,7 +40,7 @@ services:
     environment:
       APP_NAME: ${APP_NAME:-Infrastructure Operations Portal}
       APP_VERSION: ${APP_VERSION:-0.1.0}
-      APP_ENV: ${APP_ENV:-development}
+      APP_ENV: ${APP_ENV:-production}
 
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
@@ -55,8 +48,8 @@ services:
       AUTH_LOGIN_MAX_ATTEMPTS: ${AUTH_LOGIN_MAX_ATTEMPTS:-5}
       AUTH_LOGIN_WINDOW_SECONDS: ${AUTH_LOGIN_WINDOW_SECONDS:-300}
       AUTH_LOGIN_BLOCK_SECONDS: ${AUTH_LOGIN_BLOCK_SECONDS:-600}
-      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
-      CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE:-false}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-true}
+      CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE:-true}
 
     ports:
       - "${APP_PORT:-8088}:8088"
@@ -90,7 +83,7 @@ services:
       - /tmp
 
   monitoring-worker:
-    image: infrastructure-ops-app:dev
+    image: ${DOCKER_IMAGE}:${IMAGE_TAG:-latest}
     container_name: infrastructure-ops-monitoring-worker
     restart: unless-stopped
 
@@ -104,7 +97,7 @@ services:
     environment:
       APP_NAME: ${APP_NAME:-Infrastructure Operations Portal}
       APP_VERSION: ${APP_VERSION:-0.1.0}
-      APP_ENV: ${APP_ENV:-development}
+      APP_ENV: ${APP_ENV:-production}
 
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
