@@ -8,16 +8,7 @@ from app.core.auth import SESSION_COOKIE_NAME
 from app.core.config import settings
 from app.core.csrf_middleware import CSRFMiddleware
 from app.core.database import Base, SessionLocal, engine
-from app.models.asset import AssetModel
-from app.models.audit import AuditLogModel
-from app.models.monitoring import (
-    MonitoringConfigModel,
-    MonitoringResultModel,
-)
-from app.models.user import (
-    UserModel,
-    UserSessionModel,
-)
+import app.models  # noqa: F401
 from app.routes.assets import router as assets_router
 from app.routes.auth import router as auth_router
 from app.routes.dashboard import router as dashboard_router
