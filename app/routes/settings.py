@@ -69,6 +69,27 @@ def render_settings(
         "reporting",
     )
 
+    security = {
+        "session_lifetime_hours": (
+            settings.AUTH_SESSION_LIFETIME_HOURS
+        ),
+        "login_max_attempts": (
+            settings.AUTH_LOGIN_MAX_ATTEMPTS
+        ),
+        "login_window_seconds": (
+            settings.AUTH_LOGIN_WINDOW_SECONDS
+        ),
+        "login_block_seconds": (
+            settings.AUTH_LOGIN_BLOCK_SECONDS
+        ),
+        "auth_cookie_secure": (
+            settings.AUTH_COOKIE_SECURE
+        ),
+        "csrf_cookie_secure": (
+            settings.CSRF_COOKIE_SECURE
+        ),
+    }
+
     if form_data:
         form_category = form_data.get(
             "_category"
@@ -108,6 +129,7 @@ def render_settings(
             "general": general,
             "monitoring": monitoring,
             "reporting": reporting,
+            "security": security,
             "check_types": MONITORING_CHECK_TYPES,
             "timezones": SYSTEM_TIMEZONES,
             "error": error,

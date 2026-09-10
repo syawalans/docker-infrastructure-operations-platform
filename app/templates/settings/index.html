@@ -341,4 +341,102 @@
     </form>
 </div>
 
+<div class="form-card">
+    <div class="section-header">
+        <div>
+            <h2>Security Settings</h2>
+            <p>
+                Review authentication and session security
+                configuration currently active for this
+                deployment.
+            </p>
+        </div>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Session Lifetime</label>
+            <input
+                type="text"
+                value="{{ security.session_lifetime_hours }} hours"
+                readonly
+            >
+            <div class="form-help">
+                Maximum lifetime of an authenticated session.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Login Attempt Limit</label>
+            <input
+                type="text"
+                value="{{ security.login_max_attempts }} attempts"
+                readonly
+            >
+            <div class="form-help">
+                Failed attempts allowed within the login
+                tracking window.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Login Window</label>
+            <input
+                type="text"
+                value="{{ security.login_window_seconds // 60 }} minutes"
+                readonly
+            >
+            <div class="form-help">
+                Time window used to track failed login
+                attempts.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Login Block Duration</label>
+            <input
+                type="text"
+                value="{{ security.login_block_seconds // 60 }} minutes"
+                readonly
+            >
+            <div class="form-help">
+                Temporary lockout period after the login
+                attempt limit is reached.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Secure Auth Cookie</label>
+            <input
+                type="text"
+                value="{% if security.auth_cookie_secure %}Enabled{% else %}Disabled{% endif %}"
+                readonly
+            >
+            <div class="form-help">
+                Requires HTTPS when enabled for the
+                authentication cookie.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Secure CSRF Cookie</label>
+            <input
+                type="text"
+                value="{% if security.csrf_cookie_secure %}Enabled{% else %}Disabled{% endif %}"
+                readonly
+            >
+            <div class="form-help">
+                Requires HTTPS when enabled for the CSRF
+                cookie.
+            </div>
+        </div>
+    </div>
+
+    <div class="user-form-note">
+        <strong>Deployment-managed configuration.</strong>
+        These settings are controlled through the application
+        environment and cannot be changed from this interface.
+    </div>
+</div>
+
 {% endblock %}
