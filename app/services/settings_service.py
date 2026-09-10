@@ -2,6 +2,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from app.core.constants import MONITORING_CHECK_TYPES
 from app.core.settings_registry import (
     DEFAULT_SYSTEM_SETTINGS,
     SYSTEM_TIMEZONES,
@@ -279,6 +280,66 @@ class SettingsService:
             ),
             "organization_name": organization_name,
             "timezone": timezone,
+        }
+
+    def validate_monitoring_defaults(
+        self,
+        *,
+        default_check_type: str,
+        default_interval_seconds: int,
+        default_timeout_seconds: int,
+    ) -> dict[str, str | int]:
+        default_check_type = (
+            default_check_type.strip().upper()
+        )
+
+        if default_check_type not in MONITORING_CHECK_TYPES:
+            raise ValueError(
+                "Selected monitoring check type "
+                "is not supported."
+            )
+
+        if default_interval_seconds < 10:
+            raise ValueError(
+                "Default monitoring interval must be "
+                "at least 10 seconds."
+            )
+
+        if default_interval_seconds > 86400:
+            raise ValueError(
+                "Default monitoring interval must not "
+                "exceed 86400 seconds."
+            )
+
+        if default_timeout_seconds < 1:
+            raise ValueError(
+                "Default monitoring timeout must be "
+                "at least 1 second."
+            )
+
+        if default_timeout_seconds > 60:
+            raise ValueError(
+                "Default monitoring timeout must not "
+                "exceed 60 seconds."
+            )
+
+        if (
+            default_timeout_seconds
+            >= default_interval_seconds
+        ):
+            raise ValueError(
+                "Default monitoring timeout must be "
+                "shorter than the monitoring interval."
+            )
+
+        return {
+            "default_check_type": default_check_type,
+            "default_interval_seconds": (
+                default_interval_seconds
+            ),
+            "default_timeout_seconds": (
+                default_timeout_seconds
+            ),
         }
 
     def update_setting(

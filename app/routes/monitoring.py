@@ -29,6 +29,7 @@ from app.schemas.monitoring import MonitoringConfigCreate
 from app.services.asset_service import asset_service
 from app.services.audit_service import audit_service
 from app.services.monitoring_service import monitoring_service
+from app.services.settings_service import settings_service
 
 
 router = APIRouter(
@@ -100,6 +101,13 @@ def monitoring_config_form(
         asset_id,
     )
 
+    monitoring_defaults = (
+        settings_service.get_category_values(
+            db,
+            "monitoring",
+        )
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="monitoring/configure.html",
@@ -111,6 +119,7 @@ def monitoring_config_form(
             ),
             "asset": asset,
             "config": config,
+            "monitoring_defaults": monitoring_defaults,
             "check_types": MONITORING_CHECK_TYPES,
             "error": None,
             "current_user": current_user,
@@ -128,8 +137,8 @@ def monitoring_config_save(
     target: str = Form(...),
     port: str = Form(""),
     http_path: str = Form(""),
-    interval_seconds: int = Form(60),
-    timeout_seconds: int = Form(5),
+    interval_seconds: int = Form(...),
+    timeout_seconds: int = Form(...),
     enabled: bool = Form(False),
     current_user: UserModel = Depends(
         require_permission(
@@ -174,6 +183,13 @@ def monitoring_config_save(
             asset_id,
         )
 
+        monitoring_defaults = (
+            settings_service.get_category_values(
+                db,
+                "monitoring",
+            )
+        )
+
         return templates.TemplateResponse(
             request=request,
             name="monitoring/configure.html",
@@ -185,6 +201,7 @@ def monitoring_config_save(
                 ),
                 "asset": asset,
                 "config": config,
+                "monitoring_defaults": monitoring_defaults,
                 "check_types": MONITORING_CHECK_TYPES,
                 "error": str(exc),
                 "current_user": current_user,

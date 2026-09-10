@@ -132,4 +132,114 @@
         {% endif %}
     </form>
 </div>
+<div class="form-card">
+    <div class="section-header">
+        <div>
+            <h2>Monitoring Defaults</h2>
+            <p>
+                Configure default values used when creating
+                new monitoring configurations.
+            </p>
+        </div>
+    </div>
+
+    <form
+        method="post"
+        action="/settings/monitoring"
+    >
+        {% include "partials/csrf_field.html" %}
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="default_check_type">
+                    Default Check Type
+                </label>
+
+                <select
+                    id="default_check_type"
+                    name="default_check_type"
+                    required
+                >
+                    {% for check_type in check_types %}
+                    <option
+                        value="{{ check_type }}"
+                        {% if monitoring.get(
+                            'default_check_type',
+                            'HTTP'
+                        ) == check_type %}selected{% endif %}
+                    >
+                        {{ check_type }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <div class="form-help">
+                    Check type preselected for new monitoring
+                    configurations.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="default_interval_seconds">
+                    Default Interval (seconds)
+                </label>
+
+                <input
+                    type="number"
+                    id="default_interval_seconds"
+                    name="default_interval_seconds"
+                    min="10"
+                    max="86400"
+                    value="{{ monitoring.get(
+                        'default_interval_seconds',
+                        60
+                    ) }}"
+                    required
+                >
+
+                <div class="form-help">
+                    Default time between monitoring checks.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="default_timeout_seconds">
+                    Default Timeout (seconds)
+                </label>
+
+                <input
+                    type="number"
+                    id="default_timeout_seconds"
+                    name="default_timeout_seconds"
+                    min="1"
+                    max="60"
+                    value="{{ monitoring.get(
+                        'default_timeout_seconds',
+                        5
+                    ) }}"
+                    required
+                >
+
+                <div class="form-help">
+                    Maximum wait time for a monitoring check.
+                </div>
+            </div>
+        </div>
+
+        {% if has_permission(
+            request.state.current_user,
+            PERMISSION_SETTINGS_EDIT
+        ) %}
+        <div class="form-actions">
+            <button
+                type="submit"
+                class="btn"
+            >
+                Save Monitoring Defaults
+            </button>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
 {% endblock %}

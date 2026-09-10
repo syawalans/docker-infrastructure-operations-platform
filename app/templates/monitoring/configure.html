@@ -85,7 +85,16 @@
 
                     <option
                         value="{{ check_type }}"
-                        {% if config and config.check_type == check_type %}
+                        {% if (
+                            config
+                            and config.check_type == check_type
+                        ) or (
+                            not config
+                            and monitoring_defaults.get(
+                                'default_check_type',
+                                'HTTP'
+                            ) == check_type
+                        ) %}
                         selected
                         {% endif %}
                     >
@@ -154,7 +163,7 @@
                     type="number"
                     name="interval_seconds"
                     min="10"
-                    value="{{ config.interval_seconds if config else 60 }}"
+                    value="{{ config.interval_seconds if config else monitoring_defaults.get('default_interval_seconds', 60) }}"
                     required
                 >
             </div>
@@ -171,7 +180,7 @@
                     name="timeout_seconds"
                     min="1"
                     max="60"
-                    value="{{ config.timeout_seconds if config else 5 }}"
+                    value="{{ config.timeout_seconds if config else monitoring_defaults.get('default_timeout_seconds', 5) }}"
                     required
                 >
             </div>
