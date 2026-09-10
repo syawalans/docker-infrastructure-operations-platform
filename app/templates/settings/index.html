@@ -439,4 +439,99 @@
     </div>
 </div>
 
+<div class="form-card">
+    <div class="section-header">
+        <div>
+            <h2>System Information</h2>
+            <p>
+                Review application runtime and operational
+                service status for this deployment.
+            </p>
+        </div>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Application Version</label>
+            <input
+                type="text"
+                value="{{ system_information.application_version }}"
+                readonly
+            >
+            <div class="form-help">
+                Version currently reported by the application.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Environment</label>
+            <input
+                type="text"
+                value="{{ system_information.environment }}"
+                readonly
+            >
+            <div class="form-help">
+                Active application deployment environment.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Python Runtime</label>
+            <input
+                type="text"
+                value="{{ system_information.python_runtime }}"
+                readonly
+            >
+            <div class="form-help">
+                Python runtime used by the application process.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Database Status</label>
+            <input
+                type="text"
+                value="{{ system_information.database_status }}"
+                readonly
+            >
+            <div class="form-help">
+                Database connectivity status verified at
+                page load.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Monitoring Worker Status</label>
+            <input
+                type="text"
+                value="{{ system_information.worker_status }}"
+                readonly
+            >
+            <div class="form-help">
+                Worker activity inferred from recent
+                monitoring results.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Worker Last Activity</label>
+            <input
+                type="text"
+                value="{% if system_information.worker_last_activity %}{{ system_information.worker_last_activity.strftime('%Y-%m-%d %H:%M:%S UTC') }}{% else %}No activity recorded{% endif %}"
+                readonly
+            >
+            <div class="form-help">
+                Most recent monitoring result recorded by
+                the monitoring subsystem.
+            </div>
+        </div>
+    </div>
+
+    <div class="user-form-note">
+        <strong>Runtime information.</strong>
+        These values are read-only and reflect the current
+        application and service state.
+    </div>
+</div>
+
 {% endblock %}

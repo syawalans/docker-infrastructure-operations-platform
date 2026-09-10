@@ -28,6 +28,9 @@ from app.core.template_context import (
 from app.models.user import UserModel
 from app.services.audit_service import audit_service
 from app.services.settings_service import settings_service
+from app.services.system_information_service import (
+    system_information_service,
+)
 
 
 router = APIRouter(
@@ -90,6 +93,11 @@ def render_settings(
         ),
     }
 
+    system_information = (
+        system_information_service
+        .get_system_information(db)
+    )
+
     if form_data:
         form_category = form_data.get(
             "_category"
@@ -130,6 +138,7 @@ def render_settings(
             "monitoring": monitoring,
             "reporting": reporting,
             "security": security,
+            "system_information": system_information,
             "check_types": MONITORING_CHECK_TYPES,
             "timezones": SYSTEM_TIMEZONES,
             "error": error,
