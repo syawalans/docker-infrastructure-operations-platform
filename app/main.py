@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -17,15 +18,30 @@ from app.routes.reports import router as reports_router
 from app.routes.settings import router as settings_router
 from app.routes.users import router as users_router
 from app.services.auth_service import auth_service
+from app.services.settings_service import settings_service
 
 
 BASE_DIR = Path(__file__).resolve().parent
 
 Base.metadata.create_all(bind=engine)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = SessionLocal()
+
+    try:
+        settings_service.initialize_defaults(db)
+    finally:
+        db.close()
+
+    yield
+
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
+    lifespan=lifespan,
 )
 
 app.add_middleware(
