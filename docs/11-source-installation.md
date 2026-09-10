@@ -1,6 +1,10 @@
 # Source Installation
 
-This guide deploys the source-build model in `compose.yaml`. It is statically validated against the current repository; a fresh-host deployment was not performed here because the existing PostgreSQL volume and application data must remain intact.
+This guide deploys the source-build model in `compose.yaml`.
+
+## Validation status
+
+The procedure was validated on a separate fresh Linux host using commit `d3bfb66`. The source build created healthy PostgreSQL and web services, kept the monitoring worker running, and returned a healthy response from `/health`. Bootstrap created seven mapped application tables and seven default system settings with no duplicate setting keys. The initial Administrator CLI, first login, forced password change, and subsequent Dashboard access were also verified.
 
 ## Prerequisites
 
@@ -29,9 +33,10 @@ Build and start the services:
 docker compose up -d --build
 docker compose ps
 curl -fsS http://127.0.0.1:8088/health
+curl -sS -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8088/login
 ```
 
-The health command uses the example file's default application port. If the configured application port differs, use that port instead.
+The health command uses the example file's default application port. If the configured application port differs, use that port instead. The login-page check uses GET and should return `200`; do not use a HEAD request because `/login` accepts GET only.
 
 ## First startup and Administrator creation
 
